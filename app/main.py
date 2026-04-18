@@ -6,6 +6,7 @@ from datetime import datetime
 from flask import Flask, request, session, url_for, redirect, render_template, flash, make_response
 from auth import init_login_manager
 from flask_sqlalchemy import SQLAlchemy
+from flask_migrate import Migrate
 
 from app.config import Settings
 from app.dbhelper import db
@@ -20,5 +21,6 @@ app.config['SQLALCHEMY_DATABASE_URI'] = settings.get_db_uri
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db.init_app(app)
+migrate = Migrate(app, db)
 init_login_manager(app)
 
