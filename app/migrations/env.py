@@ -4,6 +4,8 @@ from logging.config import fileConfig
 from flask import current_app
 
 from alembic import context
+from app.dbhelper import Base
+from app.models import *
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -65,7 +67,7 @@ def run_migrations_offline():
     """
     url = config.get_main_option("sqlalchemy.url")
     context.configure(
-        url=url, target_metadata=get_metadata(), literal_binds=True
+        url=url, target_metadata=Base.metadata, literal_binds=True
     )
 
     with context.begin_transaction():
@@ -79,6 +81,8 @@ def run_migrations_online():
     and associate a connection with the context.
 
     """
+    print(f"DEBUG: Base from dbhelper: {Base}")
+    print(f"DEBUG: Base.metadata.tables keys: {list(Base.metadata.tables.keys())}")
 
     # this callback is used to prevent an auto-migration from being generated
     # when there are no changes to the schema
@@ -99,7 +103,7 @@ def run_migrations_online():
     with connectable.connect() as connection:
         context.configure(
             connection=connection,
-            target_metadata=get_metadata(),
+            target_metadata=Base.metadata,
             **conf_args
         )
 
