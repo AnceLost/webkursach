@@ -1,6 +1,6 @@
 from .user import User
 from .userrole import UserRole
-from .game import Game
+from .game import *
 from .platform import Platform
 from .genre import Genre
 
@@ -9,5 +9,7 @@ __all__ = [
     "UserRole",
     "Game",
     "Platform",
-    "Genre"
+    "Genre",
+    "GamePlatform",
+    "GameGenre"
 ]

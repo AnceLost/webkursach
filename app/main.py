@@ -1,6 +1,7 @@
 import sys
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent))
+#для миграций - export FLASK_APP='main.py'
 from datetime import datetime
 
 from flask import Flask, request, session, url_for, redirect, render_template, flash, make_response
@@ -10,6 +11,7 @@ from flask_migrate import Migrate
 
 from app.config import Settings
 from app.dbhelper import db
+from app.auth import bp as auth_bp
 
 
 app = Flask(__name__)
@@ -24,3 +26,8 @@ db.init_app(app)
 migrate = Migrate(app, db)
 init_login_manager(app)
 
+app.register_blueprint(auth_bp)
+
+@app.route('/')
+def index():
+    pass

@@ -1,0 +1,67 @@
+from app.dbhelper import db
+from app.models import User
+
+def get_user(user_id: int) -> User | None:
+    """Возвращает пользователя по ID или None."""
+    return db.session.get(User, user_id)
+
+def get_user_by_login(login: str) -> User | None:
+    """Возвращает пользователя по login"""
+    return db.session.execute(
+        db.select(User).where(User.login == login)
+    ).scalar_one_or_none()
+    
+def get_users(page: int = 1, per_page: int = 20) -> list[User]:
+    """Возвращает список пользователей"""
+    users = db.select(User).order_by(User.id)
+    pagination = db.paginate(users, page=page, per_page=per_page)
+    return pagination.items
+
+def search_users(login_contains: str = None, role_id: int = None, limit: int = 10) -> list[User]:
+    """Поиск пользователей по логину, роли"""
+    query = db.select(User)
+    if login_contains:
+        query = query.where(User.login.contains(login_contains))
+    if role_id:
+        query = query.where(User.role_id == role_id)
+    query = query.order_by(db.desc(User.id)).limit(limit)
+    return db.session.execute(query).scalars().all()
+
+def create_user(login: str, password: str, nickname: str, role_id: int) -> User:
+    """Функция для создания пользователя (пользователь роль не выбирает)"""
+    # Проверяем, есть ли пользователь с таким же логином
+    existing = get_user_by_login(login)
+    if existing:
+        raise ValueError(f"Пользователь с логином '{login}' уже существует")
+    
+    user = User(
+        login=login,
+        nickname=nickname,
+        role_id=role_id
+    )
+    user.set_password(password=password)
+    db.session.add(user)
+    db.session.commit()
+    
+    return user
+
+def update_user(user_id: int, #обязательный
+                new_password: str | None = None, 
+                new_nickname: str | None = None, 
+                new_role_id: int | None = None,) -> User:
+    """Обновляет пользователя """
+    user = get_user(user_id)
+    
+    if new_password: user.set_password(new_password)
+    if new_nickname: user.nickname = new_nickname
+    if new_role_id: user.role_id = new_role_id
+    
+    db.session.commit()
+    return user
+
+def delete_user(user_id: int):
+    """Удаление пользователя"""
+    user = get_user(user_id)
+    db.session.delete(user)
+    db.session.commit()
+    

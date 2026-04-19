@@ -2,7 +2,6 @@ from .base import *
     
 class User(Base, UserMixin):
     __tablename__ = 'users'
-    __table_args__ = {'extend_existing': True}
     
     id: Mapped[intpk]
     login: Mapped[str] = mapped_column(String(50))

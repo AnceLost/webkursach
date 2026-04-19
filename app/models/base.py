@@ -6,7 +6,7 @@ from flask_login import UserMixin
 from werkzeug.security import check_password_hash, generate_password_hash
 from typing import Optional, Union, List, Annotated
 
-from dbhelper import db, Base
+from app.dbhelper import db, Base
 
 intpk = Annotated[int, mapped_column(primary_key=True)]
 created_at = Annotated[datetime, mapped_column(server_default=db.func.now())]

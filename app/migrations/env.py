@@ -4,8 +4,10 @@ from logging.config import fileConfig
 from flask import current_app
 
 from alembic import context
-from app.dbhelper import Base
-from app.models import *
+from app.dbhelper import Base, db
+from models import *
+print("User.__bases__:", User.__bases__)
+print("User.metadata is Base.metadata?", User.metadata is Base.metadata)
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
