@@ -1,9 +1,4 @@
-from flask import (
-    Flask, request, session, 
-    url_for, redirect, render_template, 
-    flash, make_response, Blueprint)
-from crud.user_crud import get_user
-from .base import login_required
+from .base import *
 
 bp = Blueprint('user', __name__, url_prefix='/user')
 

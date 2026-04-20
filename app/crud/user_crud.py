@@ -17,6 +17,12 @@ def get_users(page: int = 1, per_page: int = 20) -> list[User]:
     pagination = db.paginate(users, page=page, per_page=per_page)
     return pagination.items
 
+def get_user_by_email(email: str):
+    """Возвращает пользователя по email"""
+    return db.session.execute(
+        db.select(User).where(User.email == email)
+    ).scalar_one_or_none()
+
 def search_users(login_contains: str = None, role_id: int = None, limit: int = 10) -> list[User]:
     """Поиск пользователей по логину, роли"""
     query = db.select(User)
@@ -27,32 +33,34 @@ def search_users(login_contains: str = None, role_id: int = None, limit: int = 1
     query = query.order_by(db.desc(User.id)).limit(limit)
     return db.session.execute(query).scalars().all()
 
-def create_user(login: str, password: str, nickname: str, role_id: int) -> User:
+def create_user(login: str, password: str, nickname: str, email: str, role_id: int = 1) -> User:
     """Функция для создания пользователя (пользователь роль не выбирает)"""
-    # Проверяем, есть ли пользователь с таким же логином
-    existing = get_user_by_login(login)
-    if existing:
-        raise ValueError(f"Пользователь с логином '{login}' уже существует")
-    
-    user = User(
-        login=login,
-        nickname=nickname,
-        role_id=role_id
-    )
-    user.set_password(password=password)
-    db.session.add(user)
-    db.session.commit()
+    try:
+        user = User(
+            login=login,
+            nickname=nickname,
+            email=email,
+            role_id=role_id
+        )
+        user.set_password(password=password)
+        db.session.add(user)
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        raise Exception("Не получилось создать пользователя или добавить его в базу")
     
     return user
 
 def update_user(user_id: int, #обязательный
                 new_password: str | None = None, 
-                new_nickname: str | None = None, 
+                new_nickname: str | None = None,
+                new_email: str | None = None, 
                 new_role_id: int | None = None,) -> User:
     """Обновляет пользователя """
     user = get_user(user_id)
     
     if new_password: user.set_password(new_password)
+    if new_email: user.email = new_email
     if new_nickname: user.nickname = new_nickname
     if new_role_id: user.role_id = new_role_id
     

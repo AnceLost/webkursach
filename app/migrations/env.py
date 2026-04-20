@@ -5,7 +5,7 @@ from flask import current_app
 
 from alembic import context
 from app.dbhelper import Base, db
-from models import *
+from app.models import *
 print("User.__bases__:", User.__bases__)
 print("User.metadata is Base.metadata?", User.metadata is Base.metadata)
 

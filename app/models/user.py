@@ -5,6 +5,7 @@ class User(Base, UserMixin):
     
     id: Mapped[intpk]
     login: Mapped[str] = mapped_column(String(50))
+    email: Mapped[str] = mapped_column(String(100))
     password_hash: Mapped[str] = mapped_column(String(256))
     nickname: Mapped[str] = mapped_column(String(50)) #Это имя будет видно другим пользователям
     role_id: Mapped[int] = mapped_column(ForeignKey("userroles.id"))

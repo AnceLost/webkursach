@@ -1,0 +1,5 @@
+{% extends 'base.html' %}
+{% from 'macros/render_model_table.html' import render_model_table %}
+{% block content %}
+{{render_model_table(user)}}
+{% endblock %}
