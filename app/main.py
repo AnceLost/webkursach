@@ -4,7 +4,10 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 #для миграций - export FLASK_APP='main.py'
 from datetime import datetime
 
-from flask import Flask, request, session, url_for, redirect, render_template, flash, make_response
+from flask import (
+    Flask, request, session, 
+    url_for, redirect, render_template, 
+    flash, make_response, Blueprint)
 from auth import init_login_manager
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
@@ -28,6 +31,10 @@ init_login_manager(app)
 
 app.register_blueprint(auth_bp)
 
+@app.context_processor
+def inject_getattr():
+    return dict(getattr=getattr)
+
 @app.route('/')
 def index():
-    pass
+    return render_template('index.html')

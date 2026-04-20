@@ -1,0 +1,19 @@
+{% macro render_model_table(item) %}
+<table border="1">
+    <caption>Информация о {{item.__tablename__}}</caption>
+    <thead>
+        <tr>
+            <th>Поле</th>
+            <th>Значение</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for column in item.__table__.columns %}
+        <tr>
+            <td>{{column.name}}</td>
+            <td>{{ getattr(item, column.name) }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}
