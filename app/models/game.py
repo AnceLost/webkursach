@@ -7,7 +7,7 @@ class Game(Base):
     title: Mapped[str] = mapped_column(String(200), nullable=False)
     description: Mapped[str]
     release_date: Mapped[datetime]
-    cover_image_uri: Mapped[str]
+    cover_image_uri: Mapped[str] = mapped_column(String(256), nullable=True, server_default="/static/upload/defaults/defaultcover.jpg")
     
     #строим связи
     reviews: Mapped[List["Review"]] = relationship(back_populates="game")

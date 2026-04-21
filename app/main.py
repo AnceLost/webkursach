@@ -15,6 +15,7 @@ from flask_migrate import Migrate
 from app.config import Settings
 from app.dbhelper import db
 from app.auth import bp as auth_bp
+from app.routes import user_bp
 
 
 app = Flask(__name__)
@@ -30,6 +31,7 @@ migrate = Migrate(app, db)
 init_login_manager(app)
 
 app.register_blueprint(auth_bp)
+app.register_blueprint(user_bp)
 
 @app.context_processor
 def inject_getattr():

@@ -54,18 +54,26 @@ def create_user(login: str, password: str, nickname: str, email: str, role_id: i
 def update_user(user_id: int, #обязательный
                 new_password: str | None = None, 
                 new_nickname: str | None = None,
-                new_email: str | None = None, 
-                new_role_id: int | None = None,) -> User:
+                new_email: str | None = None,
+                new_role_id: int | None = None,) -> User | None:
     """Обновляет пользователя """
     user = get_user(user_id)
-    
-    if new_password: user.set_password(new_password)
-    if new_email: user.email = new_email
-    if new_nickname: user.nickname = new_nickname
-    if new_role_id: user.role_id = new_role_id
-    
-    db.session.commit()
-    return user
+    if(user):
+        if new_password: user.set_password(new_password)
+        if new_email: user.email = new_email
+        if new_nickname: user.nickname = new_nickname
+        if new_role_id: user.role_id = new_role_id
+    else:
+        raise Exception("Вы пытаетесь изменить несуществующего пользователя")
+    try:
+        db.session.commit()
+        return user
+    except Exception as e:
+        db.session.rollback()
+        raise Exception("Не получилось изменить пользователя")
+
+def update_user_avatar(user_id: int, new_avatar_path):
+    pass
 
 def delete_user(user_id: int):
     """Удаление пользователя"""

@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <div class="userprofiledata">
+        <table class="tableforentity" border="2" caption="Данные {{user.login}} ({{user.nickname}})" rules="cols">
+            <thead>
+                <th>Поле</th>
+                <th>Значение</th>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Логин</td>
+                    <td>{{user.login}}</td>
+                </tr>
+                <tr>
+                    <td>Отображаемое имя</td>
+                    <td>{{user.nickname}}</td>
+                </tr>
+                <tr>
+                    <td>Роль</td>
+                    <td>{{user.role.name}}</td>
+                </tr>
+                <tr>
+                    <td>Дата регистрации</td>
+                    <td>{{user.created_at}}</td>
+                </tr>
+            </tbody>
+        </table>
+        <div class="userprofileavatar">
+            <img src="{{user.avatar_path}}" alt="аватарка">
+            <a href="#">Сменить фото</a>
+        </div>
+    </div>
+    <p><a href="{{url_for('user.personal_tierlist')}}">Моя таблица оценок</a></p>
+    
+{% endblock %}

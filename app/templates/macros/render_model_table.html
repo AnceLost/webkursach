@@ -12,10 +12,10 @@
             {% for column in item.__table__.columns %}
             <tr>
                 <td>{{column.name}}</td>
-                <td>{{ getattr(item, column.name) }}</td>
+                <td>{{ item[column.name] }}</td>
             </tr>
             {% endfor %}
         </tbody>
     </table>
     {% endif %}
-{% endblock %}
+{% endmacro %}

@@ -9,8 +9,8 @@ from typing import Optional, Union, List, Annotated
 from app.dbhelper import db, Base
 
 intpk = Annotated[int, mapped_column(primary_key=True)]
-created_at = Annotated[datetime, mapped_column(server_default=db.func.now())]
-updated_at = Annotated[datetime, mapped_column(server_default=db.func.now(), onupdate=db.func.now())]
+createdAt = Annotated[datetime, mapped_column(server_default=db.func.now())]
+updatedAt = Annotated[datetime, mapped_column(server_default=db.func.now(), onupdate=db.func.now())]
 
 
 
