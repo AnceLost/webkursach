@@ -42,3 +42,23 @@ class LoginForm(FlaskForm):
     password = PasswordField('Пароль', validators=[DataRequired(message="Введите пароль")])
     remember_me = BooleanField('Запомнить меня')
     submit = SubmitField('Войти')
+    
+def file_size_limit(form, field):
+        MAX_SIZE = 5 * 1024 * 1024
+        if field.data:
+            if len(field.data.read()) > MAX_SIZE:
+                # Сбрасываем указатель чтения файла обратно на 0
+                field.data.seek(0)
+                raise ValidationError('Файл слишком большой. Максимальный размер: 1 МБ')
+        # Сбрасываем указатель, если файл прошел валидацию
+        field.data.seek(0)    
+    
+class AvatarForm(FlaskForm):
+    avatar = FileField('Выберите изображение', validators=[
+        FileRequired(message='Файл обязателен'),
+        file_size_limit,
+        FileAllowed(['jpg', 'jpeg', 'png', 'gif'], 'Только изображения (jpg, jpeg, png, gif)')
+    ])
+    submit = SubmitField('Загрузить')
+    
+    

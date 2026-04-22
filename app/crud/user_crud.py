@@ -72,8 +72,15 @@ def update_user(user_id: int, #обязательный
         db.session.rollback()
         raise Exception("Не получилось изменить пользователя")
 
-def update_user_avatar(user_id: int, new_avatar_path):
-    pass
+def update_user_avatar(user_id: int, new_avatar_path: str):
+    user = get_user(user_id)
+    if new_avatar_path and user:
+        try: 
+            user.avatar_path = new_avatar_path
+            db.session.commit()
+        except Exception as e:
+            db.session.rollback()
+            raise Exception("Не удалось поменять путь до аватарки")
 
 def delete_user(user_id: int):
     """Удаление пользователя"""

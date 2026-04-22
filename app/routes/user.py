@@ -1,5 +1,6 @@
 from .base import *
 from flask_login import current_user
+from app.forms import AvatarForm
 
 bp = Blueprint('user', __name__, url_prefix='/user')
 
@@ -23,4 +24,13 @@ def personal_tierlist():
 @bp.route('profile/change-avatar')
 @login_required
 def change_avatar():
-    pass
+    form = AvatarForm()
+    if form.validate_on_submit():
+        avatar_filename = save_avatar(form.avatar.data, old_filename=current_user.avatar_filename)
+        # Обновляем поле в базе данных
+        current_user.avatar_filename = avatar_filename
+        db.session.commit()
+        flash('Аватар успешно обновлён!', 'success')
+        return redirect(url_for('user.profile'))  # или обратно на страницу профиля
+
+    return render_template('user/change-avatar.html', form=form)

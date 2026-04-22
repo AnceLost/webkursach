@@ -25,6 +25,7 @@ settings = Settings()
 app.secret_key = settings.get_secret_key
 app.config['SQLALCHEMY_DATABASE_URI'] = settings.get_db_uri
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['MAX_CONTENT_LENGTH'] = 5 * 1024 * 1024
 
 db.init_app(app)
 migrate = Migrate(app, db)
