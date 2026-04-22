@@ -6,7 +6,7 @@ class User(Base, UserMixin):
     id: Mapped[intpk]
     login: Mapped[str] = mapped_column(String(50))
     email: Mapped[str] = mapped_column(String(100))
-    avatar_path: Mapped[str] = mapped_column(String(256), nullable=True, server_default="/static/upload/defaults/defaultavatar.jpg")
+    avatar_path: Mapped[str] = mapped_column(String(256), nullable=True, server_default="defaultavatar.jpg")
     password_hash: Mapped[str] = mapped_column(String(256))
     nickname: Mapped[str] = mapped_column(String(50)) #Это имя будет видно другим пользователям
     role_id: Mapped[int] = mapped_column(ForeignKey("userroles.id"))
@@ -19,3 +19,7 @@ class User(Base, UserMixin):
 
     def check_password(self, password: str):
         return check_password_hash(self.password_hash, password)
+    
+    @property
+    def avatar_uri(self):
+        return url_for('static', filename=f'upload/avatars/{self.avatar_path}')

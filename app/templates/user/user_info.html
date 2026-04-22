@@ -1,5 +1,10 @@
 {% extends 'base.html' %}
 {% from 'macros/render_model_table.html' import render_model_table %}
 {% block content %}
-{{render_model_table(user)}}
+<div class="userprofiledata">
+    {{render_model_table(user)}}
+    <div class="userprofileavatar">
+        <img src="{{user.avatar_uri}}" width="300" height="300" alt="аватарка">
+    </div>
+</div>
 {% endblock %}

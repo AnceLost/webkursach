@@ -1,5 +1,40 @@
 {% extends 'base.html' %}
 
 {% block content %}
+    <div class="container mt-4">
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Сменить аватар</h3>
+                    </div>
+                    <div class="card-body">
+                        <!-- Текущий аватар -->
+                        <div class="text-center mb-3">
+                            <img src="{{ current_user.avatar_url }}" alt="Текущий аватар" class="rounded-circle" width="150">
+                            <p class="text-muted mt-2">Текущий аватар</p>
+                        </div>
 
+                        <form method="POST" enctype="multipart/form-data">
+                            {{ form.hidden_tag() }}
+                            <div class="mb-3">
+                                {{ form.avatar.label(class="form-label") }}
+                                {{ form.avatar(class="form-control") }}
+                                {% for error in form.avatar.errors %}
+                                    <div class="text-danger">{{ error }}</div>
+                                {% endfor %}
+                                <div class="form-text">Поддерживаются JPG, JPEG, PNG, GIF. Максимальный размер 5 МБ.</div>
+                            </div>
+                            <div class="d-grid">
+                                {{ form.submit(class="btn btn-primary") }}
+                            </div>
+                        </form>
+                    </div>
+                    <div class="card-footer">
+                        <a href="{{ url_for('profile.index') }}" class="btn btn-secondary">Назад в профиль</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 {% endblock %}

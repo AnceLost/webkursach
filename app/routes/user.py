@@ -6,10 +6,10 @@ bp = Blueprint('user', __name__, url_prefix='/user')
 
 @bp.route('/<int:user_id>')
 @login_required
-def get_user(user_id):
+def user_info(user_id):
     user = get_user(user_id)
     if(user):
-        return render_template('user/user_info.html')
+        return render_template('user/user_info.html', user=user)
 
 @bp.route('/profile')
 @login_required
@@ -26,10 +26,14 @@ def personal_tierlist():
 def change_avatar():
     form = AvatarForm()
     if form.validate_on_submit():
-        avatar_filename = save_avatar(form.avatar.data, old_filename=current_user.avatar_filename)
-        # Обновляем поле в базе данных
-        current_user.avatar_filename = avatar_filename
-        db.session.commit()
+        try:
+            # avatar_filename = save_avatar(form.avatar.data, old_filename=current_user.avatar_filename)
+            # Обновляем поле в базе данных
+            update_user_avatar(current_user.id, avatar_filename)
+        except Exception as e:
+            app.logger.error(e)
+            return "Не получилось изменить аватарку", 500
+        
         flash('Аватар успешно обновлён!', 'success')
         return redirect(url_for('user.profile'))  # или обратно на страницу профиля
 

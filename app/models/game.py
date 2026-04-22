@@ -7,12 +7,16 @@ class Game(Base):
     title: Mapped[str] = mapped_column(String(200), nullable=False)
     description: Mapped[str]
     release_date: Mapped[datetime]
-    cover_image_uri: Mapped[str] = mapped_column(String(256), nullable=True, server_default="/static/upload/defaults/defaultcover.jpg")
+    cover_path: Mapped[str] = mapped_column(String(256), nullable=True, server_default="defaultcover.jpg")
     
     #строим связи
     reviews: Mapped[List["Review"]] = relationship(back_populates="game")
     platforms: Mapped[List["GamePlatform"]] = relationship(back_populates="game")
     genres: Mapped[List["GameGenre"]] = relationship(back_populates="game")
+    
+    @property
+    def cover_uri(self):
+        return url_for('static', filename=f'upload/covers/{self.cover_path}')
     
 class GamePlatform(Base):
     __tablename__ = 'games_platforms'
