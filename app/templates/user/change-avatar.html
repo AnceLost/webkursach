@@ -11,7 +11,7 @@
                     <div class="card-body">
                         <!-- Текущий аватар -->
                         <div class="text-center mb-3">
-                            <img src="{{ current_user.avatar_url }}" alt="Текущий аватар" class="rounded-circle" width="150">
+                            <img src="{{ current_user.avatar_uri }}" alt="Текущий аватар" class="rounded-circle" width="150">
                             <p class="text-muted mt-2">Текущий аватар</p>
                         </div>
 
@@ -31,7 +31,7 @@
                         </form>
                     </div>
                     <div class="card-footer">
-                        <a href="{{ url_for('profile.index') }}" class="btn btn-secondary">Назад в профиль</a>
+                        <a href="{{ url_for('user.profile') }}" class="btn btn-secondary">Назад в профиль</a>
                     </div>
                 </div>
             </div>

@@ -28,7 +28,7 @@
         </table>
         <div class="userprofileavatar">
             <img src="{{user.avatar_uri}}" alt="аватарка">
-            <a href="#">Сменить фото</a>
+            <a href="{{url_for('user.change_avatar')}}">Сменить фото</a>
         </div>
     </div>
     <p><a href="{{url_for('user.personal_tierlist')}}">Моя таблица оценок</a></p>

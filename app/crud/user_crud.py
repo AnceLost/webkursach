@@ -1,5 +1,5 @@
-from app.dbhelper import db
-from app.models import User
+from .base import *
+
 
 def get_user(user_id: int) -> User | None:
     """Возвращает пользователя по ID или None."""
@@ -45,9 +45,9 @@ def create_user(login: str, password: str, nickname: str, email: str, role_id: i
         user.set_password(password=password)
         db.session.add(user)
         db.session.commit()
-    except Exception as e:
+    except SQLAlchemyError as e:
         db.session.rollback()
-        raise Exception("Не получилось создать пользователя или добавить его в базу")
+        raise DatabaseCreateEntityError("Не получилось создать пользователя или добавить его в базу") from e
     
     return user
 
@@ -64,23 +64,23 @@ def update_user(user_id: int, #обязательный
         if new_nickname: user.nickname = new_nickname
         if new_role_id: user.role_id = new_role_id
     else:
-        raise Exception("Вы пытаетесь изменить несуществующего пользователя")
+        raise DatabaseNotFoundError("Вы пытаетесь изменить несуществующего пользователя")
     try:
         db.session.commit()
         return user
-    except Exception as e:
+    except SQLAlchemyError as e:
         db.session.rollback()
-        raise Exception("Не получилось изменить пользователя")
+        raise DatabaseUpdateError("Не получилось изменить пользователя") from e
 
 def update_user_avatar(user_id: int, new_avatar_path: str):
-    user = get_user(user_id)
-    if new_avatar_path and user:
-        try: 
+    try: 
+        user = get_user(user_id)
+        if new_avatar_path and user:
             user.avatar_path = new_avatar_path
             db.session.commit()
-        except Exception as e:
-            db.session.rollback()
-            raise Exception("Не удалось поменять путь до аватарки")
+    except SQLAlchemyError as e:
+        db.session.rollback()
+        raise DatabaseUpdateError(f"Ошибка БД при обновлении аватара: {e}") from e
 
 def delete_user(user_id: int):
     """Удаление пользователя"""
