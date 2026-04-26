@@ -1,21 +1,10 @@
 from .base import *
 
-
-def get_user(user_id: int) -> User | None:
-    """Возвращает пользователя по ID или None."""
-    return db.session.get(User, user_id)
-
 def get_user_by_login(login: str) -> User | None:
     """Возвращает пользователя по login"""
     return db.session.execute(
         db.select(User).where(User.login == login)
     ).scalar_one_or_none()
-    
-def get_users(page: int = 1, per_page: int = 20) -> list[User]:
-    """Возвращает список пользователей"""
-    users = db.select(User).order_by(User.id)
-    pagination = db.paginate(users, page=page, per_page=per_page)
-    return pagination.items
 
 def get_user_by_email(email: str):
     """Возвращает пользователя по email"""

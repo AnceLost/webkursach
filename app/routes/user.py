@@ -11,14 +11,14 @@ bp = Blueprint('user', __name__, url_prefix='/user')
 @bp.route('/<int:user_id>')
 @login_required
 def user_info(user_id):
-    user = get_user(user_id)
+    user = get_item(User, user_id)
     if(user):
-        return render_template('user/user_info.html', user=user)
+        return render_template('user/info.html', user=user)
 
 @bp.route('/profile')
 @login_required
 def profile():
-    return render_template('user/user_profile.html', user=current_user)
+    return render_template('user/profile.html', user=current_user)
 
 @bp.route('/profile/personal-tierlist')
 @login_required

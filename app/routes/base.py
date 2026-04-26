@@ -7,8 +7,13 @@ from flask import (
     url_for, redirect, render_template, 
     flash, make_response, Blueprint, current_app)
 
-
-from app.crud.user_crud import get_user
-from app.forms import ImageForm
+from app.models import User, Game, Platform, Genre
+from app.crud.base import get_item, get_items, get_items_by_ids
+from app.forms import ImageForm, CreateGameForm
 from app.utils import AvatarConverter, save_image, delete_image
-from app.exceptions import ApplicationError, FileDeleteError, FileSaveError, DatabaseUpdateError
+from app.exceptions import (ApplicationError, 
+                            FileDeleteError, 
+                            FileSaveError, 
+                            DatabaseUpdateError, 
+                            DatabaseError,
+                            DatabaseCreateEntityError)

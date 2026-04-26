@@ -2,10 +2,6 @@ from datetime import datetime
 
 from .base import *
 
-def get_game(game_id) -> Game | None:
-    """Возвращает игру по ID или None."""
-    return db.session.get(Game, game_id)
-
 def search_games(title_contains: str = None, 
                  genre_ids: List[int] = None, 
                  page: int = 1, 
