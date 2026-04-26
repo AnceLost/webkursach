@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileField, FileAllowed, FileRequired
-from wtforms import StringField, PasswordField, SubmitField, BooleanField
+from wtforms import StringField, PasswordField, SubmitField, BooleanField, DateField, TextAreaField, SelectMultipleField
 from wtforms.validators import DataRequired, Email, EqualTo, Length, ValidationError
 from app.models import User
 from crud.user_crud import get_user_by_login, get_user_by_email
@@ -76,4 +76,12 @@ class ChangePasswordForm(FlaskForm):
     
     submit = SubmitField('Обновить')
     
-    
+class CreateGameForm(ImageForm):
+    title = StringField('Название игры', validators=[
+        DataRequired('Название игры обязательно'),
+        Length(max=200)    
+    ])
+    description = TextAreaField('Описание')
+    release_date = DateField('Дата релиза')
+    platforms = SelectMultipleField('Платформы', coerce=int)
+    genres = SelectMultipleField('Жанры', coerce=int)

@@ -6,7 +6,7 @@ class Game(Base):
     id: Mapped[intpk]
     title: Mapped[str] = mapped_column(String(200), nullable=False)
     description: Mapped[str] = mapped_column(nullable=True)
-    release_date: Mapped[datetime]
+    release_date: Mapped[datetime] = mapped_column(nullable=True)
     cover_path: Mapped[str] = mapped_column(String(256), nullable=True, server_default="defaultcover.jpg")
     
     #строим связи
