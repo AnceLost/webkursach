@@ -23,15 +23,16 @@ def get_user_by_email(email: str):
         db.select(User).where(User.email == email)
     ).scalar_one_or_none()
 
-def search_users(login_contains: str = None, role_id: int = None, limit: int = 10) -> list[User]:
+def search_users(login_contains: str = None, role_id: int = None, page: int = 1 , per_page: int = 20) -> list[User]:
     """Поиск пользователей по логину, роли"""
     query = db.select(User)
     if login_contains:
         query = query.where(User.login.contains(login_contains))
     if role_id:
         query = query.where(User.role_id == role_id)
-    query = query.order_by(db.desc(User.id)).limit(limit)
-    return db.session.execute(query).scalars().all()
+    query = query.order_by(db.desc(User.id))
+    pagination = db.paginate(query, page=page, per_page=per_page)
+    return pagination.items
 
 def create_user(login: str, password: str, nickname: str, email: str, role_id: int = 1) -> User:
     """Функция для создания пользователя (пользователь роль не выбирает)"""
@@ -88,3 +89,13 @@ def delete_user(user_id: int):
     db.session.delete(user)
     db.session.commit()
     
+def change_user_password(user_id: int, oldpass: str, newpass: str) -> bool:
+    try:
+        user = get_user(user_id)
+        if user.check_password(oldpass):
+            user.set_password(newpass)
+            db.session.commit()
+            return True
+    except SQLAlchemyError as e:
+        raise DatabaseUpdateError(f"Ошибка при изменении пароля: {e}") from e
+    return False

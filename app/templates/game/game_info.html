@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+{% from 'macros/render_model_table.html' import render_model_table %}
+{% block content %}
+<div class="userprofiledata">
+    {{render_model_table(game)}}
+    <div class="userprofileavatar">
+        <img src="{{game.cover_uri}}" width="300" height="300" alt="обложка">
+    </div>
+</div>
+{% endblock %}

@@ -2,8 +2,8 @@ from pathlib import Path
 
 from .base import *
 from flask_login import current_user
-from app.forms import AvatarForm
-from app.crud.user_crud import update_user_avatar
+from app.forms import ChangePasswordForm
+from app.crud.user_crud import update_user_avatar, change_user_password
 
 
 bp = Blueprint('user', __name__, url_prefix='/user')
@@ -28,11 +28,11 @@ def personal_tierlist():
 @bp.route('profile/change-avatar', methods=['GET', 'POST'])
 @login_required
 def change_avatar():
-    form = AvatarForm()
+    form = ImageForm()
     avatar_path = None # необходимо определить заранее, чтобы везде была доступна
     if form.validate_on_submit():
         try:
-            image = form.avatar.data
+            image = form.image.data
             avatar_path, avatar_filename = save_image(image, 'static/upload/avatars/', AvatarConverter())
             
             #берем старый путь до аватарки чтобы удалить, если обновление пройдет успешно
@@ -70,3 +70,17 @@ def change_avatar():
         return render_template('user/change-avatar.html', form=form), 500
 
     return render_template('user/change-avatar.html', form=form)
+
+@bp.route('/profile/change-pass', methods=['GET', 'POST'])
+@login_required
+def change_password():
+    form = ChangePasswordForm()
+    if form.validate_on_submit():
+        oldpass = form.oldpass.data
+        newpass = form.newpass.data
+        if change_user_password(current_user.id, oldpass, newpass):
+            flash('Пароль успешно изменен', 'success')
+        else:
+            flash('Не получилось поменять пароль, попробуйте позже или обратитесь к администратору', 'warning')
+        return redirect(url_for('user.profile'))
+    return render_template('user/change-pass.html', form=form)

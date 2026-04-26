@@ -54,12 +54,26 @@ def file_size_limit(form, field):
         # Сбрасываем указатель, если файл прошел валидацию
         field.data.seek(0)    
     
-class AvatarForm(FlaskForm):
-    avatar = FileField('Выберите изображение', validators=[
+class ImageForm(FlaskForm):
+    image = FileField('Выберите изображение', validators=[
         FileRequired(message='Файл обязателен'),
         file_size_limit,
         FileAllowed(['jpg', 'jpeg', 'png', 'gif'], 'Только изображения (jpg, jpeg, png, gif)')
     ])
     submit = SubmitField('Загрузить')
+    
+class ChangePasswordForm(FlaskForm):
+    oldpass = PasswordField('Старый пароль', validators=[
+        DataRequired(message='Для смены пароля нужно ввести старый'),
+    ])
+    newpass = PasswordField('Новый пароль', validators=[
+        DataRequired(message='Пароль обязателен')
+    ])
+    newpass2 = PasswordField('Повторите новый пароль', validators=[
+        DataRequired(message='Подтверждение обязательно'),
+        EqualTo('newpass', message='Пароли должны совпадать')
+    ])
+    
+    submit = SubmitField('Обновить')
     
     

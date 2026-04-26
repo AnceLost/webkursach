@@ -9,5 +9,6 @@ from flask import (
 
 
 from app.crud.user_crud import get_user
+from app.forms import ImageForm
 from app.utils import AvatarConverter, save_image, delete_image
 from app.exceptions import ApplicationError, FileDeleteError, FileSaveError, DatabaseUpdateError

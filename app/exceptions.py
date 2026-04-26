@@ -10,6 +10,8 @@ class FileDeleteError(ApplicationError):
     """Ошибка удаления файла."""
     pass
 
+
+
 class DatabaseError(ApplicationError):
     """Базовая ошибка при взаимодействии с БД"""
     pass
@@ -24,4 +26,8 @@ class DatabaseNotFoundError(DatabaseError):
 
 class DatabaseCreateEntityError(DatabaseError):
     """Ошибка при создании какого-то объекта(-ов) в базе"""
+    pass
+
+class DatabaseDeleteEntityError(DatabaseError):
+    """Ошибка при удалении какого-то объекта(-ов) в базе"""
     pass
