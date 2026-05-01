@@ -2,7 +2,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from typing import TypeVar, Optional
 
 from app.dbhelper import db
-from app.models import User, Game, Genre, Platform, Base
+from app.models import User, Game, Genre, Platform, Base, Review
 from app.exceptions import (DatabaseUpdateError, 
                             DatabaseNotFoundError, 
                             DatabaseCreateEntityError, 

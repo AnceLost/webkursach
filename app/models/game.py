@@ -1,4 +1,5 @@
 from .base import *
+from app.crud.review_crud import average_rating_for_game
 
 class Game(Base):
     __tablename__ = 'games'
@@ -17,6 +18,11 @@ class Game(Base):
     @property
     def cover_uri(self):
         return url_for('static', filename=f'upload/covers/{self.cover_path}')
+    
+    @property
+    def average_rating(self):
+        res = average_rating_for_game(self.id)
+        return round(res, 1) if res else 0
     
 class GamePlatform(Base):
     __tablename__ = 'games_platforms'

@@ -85,3 +85,11 @@ class CreateGameForm(ImageForm):
     release_date = DateField('Дата релиза')
     platforms = SelectMultipleField('Платформы', coerce=int)
     genres = SelectMultipleField('Жанры', coerce=int)
+    
+class ReviewForm(FlaskForm):
+    mark = SelectMultipleField('Оценка', 
+                               choices=[(i, f'i') for i in range(1, 6)], 
+                               validators=[DataRequired()], 
+                               coerce=int)
+    content = TextAreaField('Ваш отзыв', validators=[DataRequired(), Length(min=10, max=2000)])
+    submit = SubmitField('Оставить отзыв')

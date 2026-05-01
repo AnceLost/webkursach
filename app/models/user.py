@@ -11,6 +11,8 @@ class User(Base, UserMixin):
     nickname: Mapped[str] = mapped_column(String(50)) #Это имя будет видно другим пользователям
     role_id: Mapped[int] = mapped_column(ForeignKey("userroles.id"))
     role: Mapped["UserRole"] = relationship()
+    reviews: Mapped[List["Review"]] = relationship(back_populates="user")
+
     created_at: Mapped[createdAt]
     updated_at: Mapped[updatedAt]
     

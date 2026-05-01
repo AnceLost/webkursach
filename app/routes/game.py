@@ -4,6 +4,7 @@ from flask_login import current_user
 
 from .base import *
 from app.crud.game_crud import create_game as cg
+from app.crud.review_crud import create_review, get_self_review
 
 
 bp = Blueprint('game', __name__, url_prefix='/game')
@@ -17,7 +18,7 @@ def game_info(game_id):
     
 @bp.route('/create')
 @login_required
-def create_game():
+def create():
     form = CreateGameForm()
     platforms = [(p.id, p.name) for p in get_platforms()]
     genres = [(g.id, g.name) for g in get_genres()]
@@ -44,7 +45,7 @@ def create_game():
                 platforms=selected_platforms,
                 genres=selected_genres
             )
-            redirect(url_for('game.profile'))
+            return redirect(url_for('game.profile', game_id=game.id))
         except FileSaveError as e:
             current_app.logger.error(f"Ошибка сохранения файла: {e}")
             flash('Не удалось сохранить обложку игры. Проверьте формат файла.', 'danger')
@@ -60,6 +61,51 @@ def create_game():
                     current_app.logger.error(f"Не удалось удалить новый файл после ошибки БД: {del_err}")
             flash('Не удалось создать игру из-за ошибки базы данных.', 'danger')
         
-        return redirect(url_for('game.create_game'))
+        return redirect(url_for('game.create'))
     
     return render_template('game/create.html', form=form)
+
+@bp.route('/<int:game_id>/profile', methods=['GET', 'POST'])
+def profile(game_id):
+    game = Game.query.get_or_404(game_id)
+    form = ReviewForm()
+    
+    # Проверяем, оставил ли текущий пользователь уже отзыв
+    user_review = None
+    if current_user.is_authenticated:
+        user_review = get_self_review(current_user.id, game_id)
+        
+    if form.validate_on_submit():
+        if not current_user.is_authenticated:
+            flash('Войдите, чтобы оставить отзыв.', 'warning')
+            return redirect(url_for('auth.login'))
+
+        if user_review:
+            flash('Вы уже оставили отзыв на эту игру.', 'warning')
+            return redirect(url_for('game.profile', game_id=game_id))
+        
+        mark = form.mark.data
+        content = form.content.data
+        try:
+            review = create_review(
+                mark=mark,
+                content=content,
+                user_id=current_user.id,
+                game_id=game_id
+            )
+        except DatabaseCreateEntityError as e:
+            flash('Не удалось оставить коментарий', 'warning')
+        
+        return redirect(url_for('game.profile', game_id=game_id))
+
+    page = request.args.get('page', 1, type=int)    
+    reviews = get_items(Review, page=page, per_page=5)
+    return render_template('game/profile.html', 
+                           game=game, 
+                           reviews=reviews, 
+                           user_review=user_review, 
+                           form=form)
+    
+@bp.route('/search')
+def search():
+    pass
