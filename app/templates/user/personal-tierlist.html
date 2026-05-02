@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+{% block title %}Мой тирлист — GameVault{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="text-center mb-4">Мой тирлист игр</h2>
+
+    {% set tier_colors = {
+        'S': 'linear-gradient(135deg, #f6d365 0%, #fda085 100%)',
+        'A': 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+        'B': 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
+        'C': 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
+        'D': 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)'
+    } %}
+
+    {% for tier, reviews in tier_data.items() %}
+    <div class="tier-row mb-4">
+        <div class="tier-label" style="background: {{ tier_colors[tier] }};">
+            <span class="tier-badge">{{ tier }}</span>
+        </div>
+        <div class="tier-games">
+            {% if reviews %}
+                <div class="row g-3">
+                    {% for review in reviews %}
+                    <div class="col-6 col-sm-4 col-md-3 col-lg-2">
+                        <a href="{{ url_for('game.profile', game_id=review.game.id) }}" class="text-decoration-none">
+                            <div class="card game-tier-card h-100">
+                                <img src="{{ review.game.cover_uri }}" class="card-img-top" alt="{{ review.game.title }}">
+                                <div class="card-body p-2 text-center">
+                                    <h6 class="card-title small">{{ review.game.title }}</h6>
+                                    <div class="user-rating">
+                                        {{ review.mark }}
+                                    </div>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="text-muted p-3">Нет игр в этом уровне</div>
+            {% endif %}
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

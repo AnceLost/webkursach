@@ -8,10 +8,12 @@
                 <th>Значение</th>
             </thead>
             <tbody>
-                <tr>
-                    <td>Логин</td>
-                    <td>{{user.login}}</td>
-                </tr>
+                {% if selfprofile %}
+                    <tr>
+                        <td>Логин</td>
+                        <td>{{user.login}}</td>
+                    </tr>
+                {% endif %}
                 <tr>
                     <td>Отображаемое имя</td>
                     <td>{{user.nickname}}</td>
@@ -28,10 +30,14 @@
         </table>
         <div class="userprofileavatar">
             <img src="{{user.avatar_uri}}" alt="аватарка">
-            <a href="{{url_for('user.change_avatar')}}">Сменить фото</a>
+            {% if selfprofile %} 
+                <a href="{{url_for('user.change_avatar')}}">Сменить фото</a>
+            {% endif %}
         </div>
     </div>
-    <p><a href="{{url_for('user.personal_tierlist')}}">Моя таблица оценок</a></p>
-    <p><a href="{{url_for('user.change_password')}}">Сменить пароль</a></p>
+    <p><a href="{{url_for('user.personal_tierlist', user_id=user.id)}}">Моя таблица оценок</a></p>
+    {% if selfprofile %} 
+        <p><a href="{{url_for('user.change_password')}}">Сменить пароль</a></p>
+    {% endif %}
     
 {% endblock %}

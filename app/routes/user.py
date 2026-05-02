@@ -4,6 +4,8 @@ from .base import *
 from flask_login import current_user
 from app.forms import ChangePasswordForm
 from app.crud.user_crud import update_user_avatar, change_user_password
+from app.crud.review_crud import get_reviews_with_game 
+from flask_wtf.file import FileRequired
 
 
 bp = Blueprint('user', __name__, url_prefix='/user')
@@ -15,20 +17,41 @@ def user_info(user_id):
     if(user):
         return render_template('user/info.html', user=user)
 
-@bp.route('/profile')
+@bp.route('/<int:user_id>/profile')
 @login_required
-def profile():
-    return render_template('user/profile.html', user=current_user)
+def profile(user_id):
+    selfprofile = True
+    user = current_user
+    if user.id != user_id:
+        user = get_item(User, user_id)
+        selfprofile = False
+    
+    return render_template('user/profile.html', user=user, selfprofile=selfprofile)
 
-@bp.route('/profile/personal-tierlist')
+@bp.route('/<int:user_id>/profile/personal-tierlist')
 @login_required
-def personal_tierlist():
-    return "заглушка для тирлиста", 200
+def personal_tierlist(user_id):
+    reviews = get_reviews_with_game(user_id)
+    
+    # границы для тиров
+    tiers = {
+        'S': 5,
+        'A': 4,
+        'B': 3,
+        'C': 2,
+        'D': 1
+    }
+    # Группируем отзывы по тирам
+    tier_data = {}
+    for tier, value in tiers.items():
+        tier_data[tier] = [r for r in reviews if r.mark == value]
+
+    return render_template('user/personal-tierlist.html', tier_data=tier_data)
 
 @bp.route('profile/change-avatar', methods=['GET', 'POST'])
 @login_required
 def change_avatar():
-    form = ImageForm()
+    form = ImageForm(FileRequired(message='Файл обязателен'))
     avatar_path = None # необходимо определить заранее, чтобы везде была доступна
     if form.validate_on_submit():
         try:
@@ -64,7 +87,7 @@ def change_avatar():
             # Старый файл не удалился, но новый уже в БД
             current_app.logger.error(f"Ошибка удаления старого аватара: {e}")
             flash('Аватар обновлён, но старый файл не был удалён. Администратор уведомлён.', 'warning')
-            return redirect(url_for('user.profile'))
+            return redirect(url_for('user.profile', user_id=current_user.id))
 
         # Если мы здесь, значит была ошибка (кроме FileDeleteError, который уже сделал редирект)
         return render_template('user/change-avatar.html', form=form), 500

@@ -1,5 +1,5 @@
 from .base import *
-from app.crud.review_crud import average_rating_for_game
+from sqlalchemy.ext.associationproxy import association_proxy, AssociationProxy
 
 class Game(Base):
     __tablename__ = 'games'
@@ -12,17 +12,24 @@ class Game(Base):
     
     #строим связи
     reviews: Mapped[List["Review"]] = relationship(back_populates="game")
-    platforms: Mapped[List["GamePlatform"]] = relationship(back_populates="game")
-    genres: Mapped[List["GameGenre"]] = relationship(back_populates="game")
+    platforms: Mapped[List["Platform"]] = relationship(back_populates="games",secondary="games_platforms")
+    genres: Mapped[List["Genre"]] = relationship(back_populates="games", secondary="games_genres")
     
     @property
     def cover_uri(self):
         return url_for('static', filename=f'upload/covers/{self.cover_path}')
     
     @property
-    def average_rating(self):
-        res = average_rating_for_game(self.id)
+    def average_rating(self) -> float:
+        res = 0
+        for rev in self.reviews:
+            res += rev.mark
+        res = res/self.review_count if self.review_count > 0 else 0
         return round(res, 1) if res else 0
+    
+    @property
+    def review_count(self) -> int:
+        return len(self.reviews)
     
 class GamePlatform(Base):
     __tablename__ = 'games_platforms'
@@ -30,22 +37,10 @@ class GamePlatform(Base):
     game_id: Mapped[int] = mapped_column(ForeignKey("games.id", ondelete="CASCADE"), primary_key=True)
     platform_id: Mapped[int] = mapped_column(ForeignKey("platforms.id", ondelete="CASCADE"), primary_key=True)
     
-    game: Mapped["Game"] = relationship(back_populates="platforms")
-    
-    """
-    такую штуку не надо, так как платформам не обязательно знать какие игры на них запускаются    
-    platform: Mapped["Platform"] = relationship(back_populates="games")
-    """
     
 class GameGenre(Base):
     __tablename__ = 'games_genres'
     
     game_id: Mapped[int] = mapped_column(ForeignKey("games.id", ondelete="CASCADE"), primary_key=True)
     genre_id: Mapped[int] = mapped_column(ForeignKey("genres.id", ondelete="CASCADE"), primary_key=True)
-    
-    game: Mapped["Game"] = relationship(back_populates="genres")
-    
-    """
-    такую штуку не надо, так как жанрам не обязательно знать какие игры в них включены
-    genre: Mapped["Genre"] = relationship(back_populates="games")
-    """
+  

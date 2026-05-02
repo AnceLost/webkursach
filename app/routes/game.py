@@ -16,12 +16,12 @@ def game_info(game_id):
     if game:
         return render_template('game/info.html', game=game)
     
-@bp.route('/create')
+@bp.route('/create', methods=['GET', 'POST'])
 @login_required
 def create():
     form = CreateGameForm()
-    platforms = [(p.id, p.name) for p in get_platforms()]
-    genres = [(g.id, g.name) for g in get_genres()]
+    platforms = [(p.id, p.name) for p in get_items(Platform, per_page=200)] # больше 200 врядли наберется
+    genres = [(g.id, g.name) for g in get_items(Genre, per_page=200)] # больше 200 врядли наберется
     
     form.platforms.choices = platforms
     form.genres.choices = genres
@@ -36,16 +36,19 @@ def create():
 
         try:
             image = form.image.data
-            cover_path, cover_filename = save_image(image, 'static/upload/covers/', AvatarConverter())
+            cover_filename = None
+            if image:
+                cover_path, cover_filename = save_image(image, 'static/upload/covers/', AvatarConverter())
             game = cg(
                 title=title,
                 description=description,
                 release_date=release_date,
-                cover_path = cover_path,
+                cover_path=cover_filename,
                 platforms=selected_platforms,
                 genres=selected_genres
             )
             return redirect(url_for('game.profile', game_id=game.id))
+        
         except FileSaveError as e:
             current_app.logger.error(f"Ошибка сохранения файла: {e}")
             flash('Не удалось сохранить обложку игры. Проверьте формат файла.', 'danger')
@@ -67,7 +70,9 @@ def create():
 
 @bp.route('/<int:game_id>/profile', methods=['GET', 'POST'])
 def profile(game_id):
-    game = Game.query.get_or_404(game_id)
+    game = get_item(Game, game_id)
+    if game is None:
+        abort(404)
     form = ReviewForm()
     
     # Проверяем, оставил ли текущий пользователь уже отзыв
@@ -95,7 +100,7 @@ def profile(game_id):
             )
         except DatabaseCreateEntityError as e:
             flash('Не удалось оставить коментарий', 'warning')
-        
+            print(e)
         return redirect(url_for('game.profile', game_id=game_id))
 
     page = request.args.get('page', 1, type=int)    
@@ -104,7 +109,9 @@ def profile(game_id):
                            game=game, 
                            reviews=reviews, 
                            user_review=user_review, 
-                           form=form)
+                           form=form,
+                           page=page,
+                           max_page=int(len(reviews)/5) + 1)
     
 @bp.route('/search')
 def search():

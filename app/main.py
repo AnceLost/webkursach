@@ -2,6 +2,7 @@ import sys
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 #для миграций - export FLASK_APP='main.py'
+#пароль для _elder_kobold_ - qwe123rty456
 from datetime import datetime
 
 from flask import (
@@ -14,8 +15,11 @@ from flask_migrate import Migrate
 
 from app.config import Settings
 from app.dbhelper import db
+from app.crud.base import get_items
+from app.models import Game
 from app.auth import bp as auth_bp
 from app.routes import user_bp
+from app.routes import game_bp
 
 
 app = Flask(__name__)
@@ -33,6 +37,7 @@ init_login_manager(app)
 
 app.register_blueprint(auth_bp)
 app.register_blueprint(user_bp)
+app.register_blueprint(game_bp)
 
 @app.context_processor
 def inject_getattr():
@@ -40,4 +45,5 @@ def inject_getattr():
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    latest_games = get_items(Game, per_page=5)
+    return render_template('index.html', latest_games=latest_games)

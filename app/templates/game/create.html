@@ -4,7 +4,7 @@
 
 {% block content %}
     <form method="POST" enctype="multipart/form-data" action="">
-        {{ form.hidden_tag()}}
+        {{ form.hidden_tag() }}
         {{ render_form_field(form.title) }}
         {{ render_form_field(form.description) }}
         {{ render_form_field(form.release_date) }}

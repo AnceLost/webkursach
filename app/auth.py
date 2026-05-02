@@ -4,7 +4,8 @@ from flask_login import LoginManager, login_user, logout_user, login_required
 from app.dbhelper import db
 from app.models import User
 from forms import RegistrationForm, LoginForm
-from crud.user_crud import create_user, get_user, get_user_by_login
+from crud.user_crud import create_user, get_user_by_login
+from crud.base import get_item
 
 bp = Blueprint('auth', __name__, url_prefix='/auth')
 
@@ -17,7 +18,7 @@ def init_login_manager(app):
     login_manager.init_app(app)
 
 def load_user(user_id):
-    user = get_user(user_id)
+    user = get_item(User, user_id)
     return user
 
 @bp.route('/login', methods=['GET', 'POST'])
@@ -41,7 +42,7 @@ def register():
     form = RegistrationForm()
     if form.validate_on_submit():
         try:
-            create_user(
+            user = create_user(
                 login = form.login.data,
                 email = form.email.data,
                 password = form.password.data,

@@ -29,7 +29,7 @@ def create_game(title: str,
         game = Game(
             title=title,
             description=description,
-            release_date=release_date.date(),
+            release_date=release_date,
             cover_path=cover_path,
             platforms=platforms,
             genres=genres
@@ -90,4 +90,3 @@ def delete_game(game_id):
     except SQLAlchemyError as e:
         db.session.rollback()
         raise DatabaseDeleteEntityError(f"Не удалось удалить игру: {e}") from e
-    

@@ -1,6 +1,8 @@
+import datetime
+
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileField, FileAllowed, FileRequired
-from wtforms import StringField, PasswordField, SubmitField, BooleanField, DateField, TextAreaField, SelectMultipleField
+from wtforms import StringField, PasswordField, SubmitField, BooleanField, DateField, TextAreaField, SelectMultipleField, SelectField
 from wtforms.validators import DataRequired, Email, EqualTo, Length, ValidationError
 from app.models import User
 from crud.user_crud import get_user_by_login, get_user_by_email
@@ -50,17 +52,22 @@ def file_size_limit(form, field):
             if len(field.data.read()) > MAX_SIZE:
                 # Сбрасываем указатель чтения файла обратно на 0
                 field.data.seek(0)
-                raise ValidationError('Файл слишком большой. Максимальный размер: 1 МБ')
-        # Сбрасываем указатель, если файл прошел валидацию
-        field.data.seek(0)    
+                raise ValidationError('Файл слишком большой. Максимальный размер: 5 МБ')
+            else:
+                # Сбрасываем указатель, если файл прошел валидацию
+                field.data.seek(0)    
     
 class ImageForm(FlaskForm):
-    image = FileField('Выберите изображение', validators=[
-        FileRequired(message='Файл обязателен'),
-        file_size_limit,
-        FileAllowed(['jpg', 'jpeg', 'png', 'gif'], 'Только изображения (jpg, jpeg, png, gif)')
-    ])
+    image = FileField('Выберите изображение', validators=[])
     submit = SubmitField('Загрузить')
+    def __init__(self, *validators):
+        super().__init__()
+        base = [
+                file_size_limit,
+                FileAllowed(['jpg', 'jpeg', 'png', 'gif'], 'Только изображения (jpg, jpeg, png, gif)')
+        ]
+        self.image.validators = base + list(validators)
+    
     
 class ChangePasswordForm(FlaskForm):
     oldpass = PasswordField('Старый пароль', validators=[
@@ -82,13 +89,13 @@ class CreateGameForm(ImageForm):
         Length(max=200)    
     ])
     description = TextAreaField('Описание')
-    release_date = DateField('Дата релиза')
+    release_date = DateField('Дата релиза', default=datetime.date.today)
     platforms = SelectMultipleField('Платформы', coerce=int)
     genres = SelectMultipleField('Жанры', coerce=int)
     
 class ReviewForm(FlaskForm):
-    mark = SelectMultipleField('Оценка', 
-                               choices=[(i, f'i') for i in range(1, 6)], 
+    mark = SelectField('Оценка', 
+                               choices=[(i, str(i)) for i in range(1, 6)], 
                                validators=[DataRequired()], 
                                coerce=int)
     content = TextAreaField('Ваш отзыв', validators=[DataRequired(), Length(min=10, max=2000)])

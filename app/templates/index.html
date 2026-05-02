@@ -1,4 +1,8 @@
 {% extends 'base.html' %}
 {% block content %}
 <h2>Главная страница</h2>
+<a href="{{url_for('game.search')}}">Список игр</a>
+<div class="last-added-games">
+   {% include 'blocks/latest-added-games.html' %}
+</div>
 {% endblock %}
