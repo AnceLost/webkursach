@@ -1,14 +1,18 @@
 {% extends 'base.html' %}
-
+{% from 'macros/render_form_field.html' import render_form_field %}
 {% block content %}
+    {% if user.banned%}
+        <h2 class="ban-label">Этот аккаунт заблокирован!!!</h2>
+    {% endif %}
     <div class="userprofiledata">
+       
         <table class="tableforentity" border="2" caption="Данные {{user.login}} ({{user.nickname}})" rules="cols">
             <thead>
                 <th>Поле</th>
                 <th>Значение</th>
             </thead>
             <tbody>
-                {% if selfprofile %}
+                {% if selfprofile or adminMode %}
                     <tr>
                         <td>Логин</td>
                         <td>{{user.login}}</td>
@@ -35,6 +39,13 @@
             {% endif %}
         </div>
     </div>
+    {% if adminMode %}
+        <form method="POST" action="{{url_for('user.toggle_ban', user_id=user.id)}}" style="display: inline;">
+            {{ form.hidden_tag() }}
+            {{ form.action }}
+            {{ form.submit }}
+        </form>
+    {% endif %}
     <p><a href="{{url_for('user.personal_tierlist', user_id=user.id)}}">Моя таблица оценок</a></p>
     {% if selfprofile %} 
         <p><a href="{{url_for('user.change_password')}}">Сменить пароль</a></p>

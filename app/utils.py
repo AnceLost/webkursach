@@ -1,8 +1,11 @@
 import os
 import secrets
+from typing import Callable
+from functools import wraps
 
 from PIL import Image
-from flask import current_app
+from flask import current_app, redirect, url_for, abort
+from flask_login import current_user
 
 from app.exceptions import FileSaveError, FileDeleteError
 
@@ -64,4 +67,27 @@ def delete_image(file_path: str):
             os.remove(file_path)
         except OSError as e:
             raise FileDeleteError(f"Не получилось удалить {file_path}") from e
-    
+
+#декоратор для проверки уровня доступа
+def check_permissions(required_access_level: int):
+    def wrapper(func: Callable):
+        @wraps(func)
+        def inner(*args, **kwargs):
+            nonlocal required_access_level #иначе не видит 
+            access_level = current_user.role.value
+            if access_level < required_access_level:
+                abort(403)  # доступ запрещён
+            res = func(*args, **kwargs)
+            return res
+        return inner
+    return wrapper
+
+#декоратор для проверки бана
+def check_not_banned(func: Callable):
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        if current_user.banned:
+            flash("Ваш аккаунт заблокирован, вы не можете это сделать", 'danger')
+            return redirect(url_for('index'))
+        return func(*args, **kwargs)
+    return wrapper

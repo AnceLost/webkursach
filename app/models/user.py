@@ -9,9 +9,10 @@ class User(Base, UserMixin):
     avatar_path: Mapped[str] = mapped_column(String(256), nullable=True, server_default="defaultavatar.jpg")
     password_hash: Mapped[str] = mapped_column(String(256))
     nickname: Mapped[str] = mapped_column(String(50)) #Это имя будет видно другим пользователям
+    banned: Mapped[bool] = mapped_column(default=False, nullable=False)
     role_id: Mapped[int] = mapped_column(ForeignKey("userroles.id"))
     role: Mapped["UserRole"] = relationship()
-    reviews: Mapped[List["Review"]] = relationship(back_populates="user")
+    reviews: Mapped[List["Review"]] = relationship(back_populates="user", cascade="all, delete-orphan")
 
     created_at: Mapped[createdAt]
     updated_at: Mapped[updatedAt]

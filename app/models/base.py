@@ -1,7 +1,7 @@
 from datetime import datetime
 
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from sqlalchemy import String, ForeignKey, DateTime, Text, Integer, MetaData, CheckConstraint
+from sqlalchemy import String, ForeignKey, DateTime, Text, Integer, MetaData, CheckConstraint, Boolean
 from flask_login import UserMixin
 from flask import url_for
 from werkzeug.security import check_password_hash, generate_password_hash

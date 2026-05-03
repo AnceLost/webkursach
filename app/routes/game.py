@@ -4,13 +4,14 @@ from flask_login import current_user
 
 from .base import *
 from app.crud.game_crud import create_game as cg
-from app.crud.review_crud import create_review, get_self_review
+from app.crud.review_crud import create_review, get_self_review, get_pagination_reviews_for_games
 
 
 bp = Blueprint('game', __name__, url_prefix='/game')
 
 @bp.route('/<int:game_id>')
 @login_required
+@check_permissions(20) #20 - админ
 def game_info(game_id):
     game = get_item(Game, game_id)
     if game:
@@ -18,6 +19,7 @@ def game_info(game_id):
     
 @bp.route('/create', methods=['GET', 'POST'])
 @login_required
+@check_permissions(10) #10 - модератор и выше
 def create():
     form = CreateGameForm()
     platforms = [(p.id, p.name) for p in get_items(Platform, per_page=200)] # больше 200 врядли наберется
@@ -68,7 +70,7 @@ def create():
     
     return render_template('game/create.html', form=form)
 
-@bp.route('/<int:game_id>/profile', methods=['GET', 'POST'])
+@bp.route('/<int:game_id>/profile', methods=['GET'])
 def profile(game_id):
     game = get_item(Game, game_id)
     if game is None:
@@ -79,12 +81,34 @@ def profile(game_id):
     user_review = None
     if current_user.is_authenticated:
         user_review = get_self_review(current_user.id, game_id)
+
+    page = request.args.get('page', 1, type=int)    
+    reviews = get_pagination_reviews_for_games(game_id, page=page, per_page=5)
+    banned = current_user.banned if current_user.is_authenticated else False
+    return render_template('game/profile.html', 
+                           game=game, 
+                           reviews=reviews, 
+                           user_review=user_review, 
+                           form=form,
+                           page=page,
+                           has_next_page=reviews.has_next,
+                           user_has_banned=banned)
+
+@bp.route('/<int:game_id>/add_review', methods=['POST'])
+@login_required
+@check_not_banned
+def add_review(game_id: int):
+    game = get_item(Game, game_id)
+    if game is None:
+        abort(404)
         
+    form = ReviewForm()
+    
     if form.validate_on_submit():
         if not current_user.is_authenticated:
             flash('Войдите, чтобы оставить отзыв.', 'warning')
             return redirect(url_for('auth.login'))
-
+        
         if user_review:
             flash('Вы уже оставили отзыв на эту игру.', 'warning')
             return redirect(url_for('game.profile', game_id=game_id))
@@ -102,16 +126,8 @@ def profile(game_id):
             flash('Не удалось оставить коментарий', 'warning')
             print(e)
         return redirect(url_for('game.profile', game_id=game_id))
-
-    page = request.args.get('page', 1, type=int)    
-    reviews = get_items(Review, page=page, per_page=5)
-    return render_template('game/profile.html', 
-                           game=game, 
-                           reviews=reviews, 
-                           user_review=user_review, 
-                           form=form,
-                           page=page,
-                           max_page=int(len(reviews)/5) + 1)
+    
+    return redirect(url_for('game.profile', game_id=game_id))
     
 @bp.route('/search')
 def search():

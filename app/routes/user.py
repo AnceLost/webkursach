@@ -1,17 +1,18 @@
 from pathlib import Path
 
-from .base import *
 from flask_login import current_user
-from app.forms import ChangePasswordForm
-from app.crud.user_crud import update_user_avatar, change_user_password
-from app.crud.review_crud import get_reviews_with_game 
 from flask_wtf.file import FileRequired
 
+from .base import *
+from app.forms import ChangePasswordForm
+from app.crud.user_crud import update_user_avatar, change_user_password, ban_user, unban_user
+from app.crud.review_crud import get_reviews_with_game 
 
 bp = Blueprint('user', __name__, url_prefix='/user')
 
 @bp.route('/<int:user_id>')
 @login_required
+@check_permissions(20) #20 - админ
 def user_info(user_id):
     user = get_item(User, user_id)
     if(user):
@@ -21,12 +22,28 @@ def user_info(user_id):
 @login_required
 def profile(user_id):
     selfprofile = True
+    form = None
+    adminMode = current_user.role.value >= 20
     user = current_user
     if user.id != user_id:
         user = get_item(User, user_id)
         selfprofile = False
+        
+    if adminMode: 
+        form = BanForm()
+        if user.banned:
+            form.action.data = 'unban'
+            form.submit.label.text = 'Разбанить'
+            form.submit.render_kw = {'class': 'btn btn-success btn-sm'}
+        else:
+            form.action.data = 'ban'
+            form.submit.label.text = 'Забанить'
+            form.submit.render_kw = {
+                'class': 'btn btn-warning btn-sm',
+                'onclick': "return confirm('Забанить пользователя? Все его отзывы будут удалены!');"
+            }
     
-    return render_template('user/profile.html', user=user, selfprofile=selfprofile)
+    return render_template('user/profile.html', user=user, selfprofile=selfprofile, adminMode=adminMode, form=form)
 
 @bp.route('/<int:user_id>/profile/personal-tierlist')
 @login_required
@@ -107,3 +124,18 @@ def change_password():
             flash('Не получилось поменять пароль, попробуйте позже или обратитесь к администратору', 'warning')
         return redirect(url_for('user.profile'))
     return render_template('user/change-pass.html', form=form)
+
+@bp.route('/<int:user_id>/toggle_ban', methods=['POST'])
+@login_required
+@check_permissions(20) #20 - админ
+def toggle_ban(user_id):
+    action = request.form.get('action')
+    if action not in ('ban', 'unban'):
+        abort(400, description="Неверное действие")
+    try:
+        if action=='ban': ban_user(user_id)
+        elif action=='unban': unban_user(user_id)
+    except DatabaseUpdateError as e:
+        flash("Не удалось забанить/разбанить пользователя", 'danger')
+        current_app.logger.error(e)
+    return redirect(url_for('user.profile', user_id=user_id))

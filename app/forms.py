@@ -2,7 +2,7 @@ import datetime
 
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileField, FileAllowed, FileRequired
-from wtforms import StringField, PasswordField, SubmitField, BooleanField, DateField, TextAreaField, SelectMultipleField, SelectField
+from wtforms import StringField, PasswordField, SubmitField, BooleanField, DateField, TextAreaField, SelectMultipleField, SelectField, HiddenField
 from wtforms.validators import DataRequired, Email, EqualTo, Length, ValidationError
 from app.models import User
 from crud.user_crud import get_user_by_login, get_user_by_email
@@ -100,3 +100,7 @@ class ReviewForm(FlaskForm):
                                coerce=int)
     content = TextAreaField('Ваш отзыв', validators=[DataRequired(), Length(min=10, max=2000)])
     submit = SubmitField('Оставить отзыв')
+    
+class BanForm(FlaskForm):
+    action = HiddenField('action', validators=[DataRequired()])
+    submit = SubmitField('Забанить/Разбанить')

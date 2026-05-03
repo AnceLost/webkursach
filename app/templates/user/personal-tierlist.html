@@ -14,17 +14,17 @@
     } %}
 
     {% for tier, reviews in tier_data.items() %}
-    <div class="tier-row mb-4">
-        <div class="tier-label" style="background: {{ tier_colors[tier] }};">
+    <div class="tier-row mb-4"> <!--Весь ряд-->
+        <div class="tier-label" style="background: {{ tier_colors[tier] }};"> <!--Цветная плашка-->
             <span class="tier-badge">{{ tier }}</span>
         </div>
-        <div class="tier-games">
+        <div class="tier-games"> <!--Карточки игр-->
             {% if reviews %}
                 <div class="row g-3">
                     {% for review in reviews %}
                     <div class="col-6 col-sm-4 col-md-3 col-lg-2">
                         <a href="{{ url_for('game.profile', game_id=review.game.id) }}" class="text-decoration-none">
-                            <div class="card game-tier-card h-100">
+                            <div class="card game-tier-card h-100"> <!--Карточка игры-->
                                 <img src="{{ review.game.cover_uri }}" class="card-img-top" alt="{{ review.game.title }}">
                                 <div class="card-body p-2 text-center">
                                     <h6 class="card-title small">{{ review.game.title }}</h6>

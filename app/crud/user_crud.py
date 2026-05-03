@@ -88,3 +88,24 @@ def change_user_password(user_id: int, oldpass: str, newpass: str) -> bool:
     except SQLAlchemyError as e:
         raise DatabaseUpdateError(f"Ошибка при изменении пароля: {e}") from e
     return False
+
+def ban_user(user_id):
+    user = get_item(User, user_id)
+    try:
+        # Сначала удаляем все отзывы пользователя
+        db.delete(Review).where(Review.user_id==user_id)
+        db.session.commit()
+        user.banned = True
+        db.session.commit()
+    except SQLAlchemyError as e:
+        db.session.rollback()
+        raise DatabaseUpdateError(f"Неудалось забанить пользователя {user_id}: {e}") from e
+
+def unban_user(user_id):
+    user = get_item(User, user_id)
+    try:
+        user.banned = False
+        db.session.commit()
+    except SQLAlchemyError as e:
+        db.session.rollback()
+        raise DatabaseUpdateError(f"Не удалось разбанить пользователя {user_id}: {e}") from e

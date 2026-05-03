@@ -25,6 +25,12 @@ def get_items(model: type[T], page: int = 1, per_page: int = 20) -> List[T]:
     pagination = db.paginate(platforms, page=page, per_page=per_page)
     return pagination.items
 
+def get_pagination(model: type[T]):
+    """Возвращает сам объект пагинации"""
+    items = db.select(model).order_by(model.id)
+    pagination = db.paginate(items)
+    return pagination
+
 def get_items_by_ids(model: type[T], ids: List[int]) -> List[T]:
     """Возвращает список объектов модели model с id, входящими в ids."""
     if not ids: return []
