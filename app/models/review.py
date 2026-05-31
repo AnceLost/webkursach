@@ -4,7 +4,7 @@ class Review(Base):
     __tablename__ = 'reviews'
     
     id: Mapped[intpk]
-    mark: Mapped[int] = mapped_column(CheckConstraint("mark => 1 AND mark <= 5"))
+    mark: Mapped[int] = mapped_column(CheckConstraint("mark >= 1 AND mark <= 5"))
     text: Mapped[str] = mapped_column(String(2000))
     
     #связи с игрой и пользователем 

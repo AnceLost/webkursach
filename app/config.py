@@ -3,19 +3,30 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 __name__ = 'config'
 
 class Settings(BaseSettings):
-    DB_HOST: str
-    DB_PORT: int
-    DB_USER: str
-    DB_PASS: str
-    DB_NAME: str
-    FLASK_SECRET_KEY: str
+    DB_HOST: str = "localhost"
+    DB_PORT: int = 5432
+    DB_USER: str = "gamevault_user"
+    DB_PASS: str = "secret"
+    DB_NAME: str = "gamevault"
+    FLASK_SECRET_KEY: str = "default-secret-key"
+    
+    TESTING: bool = False
+    WTF_CSRF_ENABLED: bool = True      
     
     @property
-    def get_db_uri(self):
-        return f"postgresql+psycopg2://{self.DB_USER}:{self.DB_PASS}@{self.DB_HOST}/{self.DB_NAME}"
-    
-    @property
-    def get_secret_key(self):
+    def SECRET_KEY(self):
         return self.FLASK_SECRET_KEY
-    
+
+    @property
+    def SQLALCHEMY_DATABASE_URI(self):
+        if self.TESTING:
+            return "sqlite:///:memory:"
+        return f"postgresql+psycopg2://{self.DB_USER}:{self.DB_PASS}@{self.DB_HOST}/{self.DB_NAME}"
+
     model_config = SettingsConfigDict(env_file="app/.env")
+    
+# class TestingSettings(Settings):
+#     TESTING = True
+#     SQLALCHEMY_DATABASE_URI = 'sqlite:///:memory:'
+#     WTF_CSRF_ENABLED = False   # отключаем CSRF для удобства тестирования форм
+#     SERVER_NAME = 'localhost'  # для url_for в тестах

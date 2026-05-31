@@ -45,7 +45,7 @@
         <div class="card mb-4">
             <div class="card-body">
                 <h5 class="card-title">Оставить отзыв</h5>
-                <form method="POST" action="">
+                <form method="POST" action="{{url_for("game.add_review", game_id=game.id)}}">
                     {{ form.hidden_tag() }}
                     <div class="mb-3">
                         {{ render_form_field(form.mark) }}

@@ -65,9 +65,13 @@ def personal_tierlist(user_id):
 
     return render_template('user/personal-tierlist.html', tier_data=tier_data)
 
-@bp.route('profile/change-avatar', methods=['GET', 'POST'])
+@bp.route('/<int:user_id>/profile/change-avatar', methods=['GET', 'POST'])
 @login_required
-def change_avatar():
+def change_avatar(user_id):
+    #аватарку может поменять модер, админ или сам пользователь
+    if (current_user.id != user_id and current_user.role.value < 10):
+        abort(403)  # доступ запрещён
+        
     form = ImageForm(FileRequired(message='Файл обязателен'))
     avatar_path = None # необходимо определить заранее, чтобы везде была доступна
     if form.validate_on_submit():
@@ -79,12 +83,13 @@ def change_avatar():
             oldfilepath = current_user.avatar_uri
             oldfilename = Path(oldfilepath).stem
             
-            update_user_avatar(current_user.id, avatar_filename)
+            update_user_avatar(user_id, avatar_filename)
             
             #Если код дошёл до сюда и не выдал ошибку, значит можно удалять старый аватар (если не стандартный)
             if oldfilename != 'defaultavatar.jpg':
                 delete_image(oldfilepath)
-                
+            return redirect(url_for('user.profile', user_id=user_id))
+            
         except FileSaveError as e:
             current_app.logger.error(f"Ошибка сохранения файла: {e}")
             flash('Не удалось сохранить новый аватар. Проверьте формат файла.', 'danger')
@@ -104,25 +109,29 @@ def change_avatar():
             # Старый файл не удалился, но новый уже в БД
             current_app.logger.error(f"Ошибка удаления старого аватара: {e}")
             flash('Аватар обновлён, но старый файл не был удалён. Администратор уведомлён.', 'warning')
-            return redirect(url_for('user.profile', user_id=current_user.id))
+            return redirect(url_for('user.profile', user_id=user_id))
 
         # Если мы здесь, значит была ошибка (кроме FileDeleteError, который уже сделал редирект)
         return render_template('user/change-avatar.html', form=form), 500
 
     return render_template('user/change-avatar.html', form=form)
 
-@bp.route('/profile/change-pass', methods=['GET', 'POST'])
+@bp.route('/<int:user_id>/profile/change-pass', methods=['GET', 'POST'])
 @login_required
-def change_password():
+def change_password(user_id):
+    #пароль может поменять админ или сам пользователь
+    if (current_user.id != user_id and current_user.role.value < 20):
+        abort(403)  # доступ запрещён
+    
     form = ChangePasswordForm()
     if form.validate_on_submit():
         oldpass = form.oldpass.data
         newpass = form.newpass.data
-        if change_user_password(current_user.id, oldpass, newpass):
+        if change_user_password(user_id, oldpass, newpass):
             flash('Пароль успешно изменен', 'success')
         else:
             flash('Не получилось поменять пароль, попробуйте позже или обратитесь к администратору', 'warning')
-        return redirect(url_for('user.profile'))
+        return redirect(url_for('user.profile', user_id=user_id))
     return render_template('user/change-pass.html', form=form)
 
 @bp.route('/<int:user_id>/toggle_ban', methods=['POST'])

@@ -6,6 +6,8 @@
 .tableforentity td, th{
     border-right: 2px solid black;
     padding: 10px;
+    max-width: 700px;
+    word-wrap: break-word;
 }
 
 .userprofiledata{

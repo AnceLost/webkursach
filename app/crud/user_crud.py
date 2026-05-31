@@ -47,7 +47,7 @@ def update_user(user_id: int, #обязательный
                 new_email: str | None = None,
                 new_role_id: int | None = None,) -> User | None:
     """Обновляет пользователя """
-    user = get_user(user_id)
+    user = get_item(User, user_id)
     if(user):
         if new_password: user.set_password(new_password)
         if new_email: user.email = new_email
@@ -64,7 +64,7 @@ def update_user(user_id: int, #обязательный
 
 def update_user_avatar(user_id: int, new_avatar_path: str):
     try: 
-        user = get_user(user_id)
+        user = get_item(User, user_id)
         if new_avatar_path and user:
             user.avatar_path = new_avatar_path
             db.session.commit()
@@ -74,13 +74,15 @@ def update_user_avatar(user_id: int, new_avatar_path: str):
 
 def delete_user(user_id: int):
     """Удаление пользователя"""
-    user = get_user(user_id)
+    user = get_item(User, user_id)
+    # Сначала удаляем все отзывы пользователя
+    db.delete(Review).where(Review.user_id==user_id)
     db.session.delete(user)
     db.session.commit()
     
 def change_user_password(user_id: int, oldpass: str, newpass: str) -> bool:
     try:
-        user = get_user(user_id)
+        user = get_item(User, user_id)
         if user.check_password(oldpass):
             user.set_password(newpass)
             db.session.commit()
@@ -93,8 +95,7 @@ def ban_user(user_id):
     user = get_item(User, user_id)
     try:
         # Сначала удаляем все отзывы пользователя
-        db.delete(Review).where(Review.user_id==user_id)
-        db.session.commit()
+        db.session.execute(db.delete(Review).where(Review.user_id==user_id))
         user.banned = True
         db.session.commit()
     except SQLAlchemyError as e:

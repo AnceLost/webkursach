@@ -60,11 +60,12 @@ def file_size_limit(form, field):
 class ImageForm(FlaskForm):
     image = FileField('Выберите изображение', validators=[])
     submit = SubmitField('Загрузить')
-    def __init__(self, *validators):
-        super().__init__()
+
+    def __init__(self, *validators, **kwargs):
+        super().__init__(**kwargs)
         base = [
-                file_size_limit,
-                FileAllowed(['jpg', 'jpeg', 'png', 'gif'], 'Только изображения (jpg, jpeg, png, gif)')
+            file_size_limit,
+            FileAllowed(['jpg', 'jpeg', 'png', 'gif'], 'Только изображения (jpg, jpeg, png, gif)')
         ]
         self.image.validators = base + list(validators)
     
@@ -95,9 +96,9 @@ class CreateGameForm(ImageForm):
     
 class ReviewForm(FlaskForm):
     mark = SelectField('Оценка', 
-                               choices=[(i, str(i)) for i in range(1, 6)], 
-                               validators=[DataRequired()], 
-                               coerce=int)
+                        choices=[(i, str(i)) for i in range(1, 6)], 
+                        validators=[DataRequired('Это поле обязательно')], 
+                        coerce=int)
     content = TextAreaField('Ваш отзыв', validators=[DataRequired(), Length(min=10, max=2000)])
     submit = SubmitField('Оставить отзыв')
     

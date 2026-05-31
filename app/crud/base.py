@@ -21,14 +21,15 @@ def get_items(model: type[T], page: int = 1, per_page: int = 20) -> List[T]:
     :param page: номер страницы
     :param per_page: сколько объектов на одной странице
     """
-    platforms = db.select(model).order_by(model.id)
-    pagination = db.paginate(platforms, page=page, per_page=per_page)
-    return pagination.items
+    return get_pagination(model=model, page=page, per_page=per_page).items
 
-def get_pagination(model: type[T]):
-    """Возвращает сам объект пагинации"""
+def get_pagination(model: type[T], page: int = 1, per_page: int = 20):
+    """Возвращает сам объект пагинации
+    :param page: номер страницы
+    :param per_page: сколько объектов на одной странице
+    """
     items = db.select(model).order_by(model.id)
-    pagination = db.paginate(items)
+    pagination = db.paginate(items, page=page, per_page=per_page)
     return pagination
 
 def get_items_by_ids(model: type[T], ids: List[int]) -> List[T]:

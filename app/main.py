@@ -20,30 +20,7 @@ from app.models import Game
 from app.auth import bp as auth_bp
 from app.routes import user_bp
 from app.routes import game_bp
+from app.factory import create_app
 
 
-app = Flask(__name__)
-
-settings = Settings()
-
-app.secret_key = settings.get_secret_key
-app.config['SQLALCHEMY_DATABASE_URI'] = settings.get_db_uri
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['MAX_CONTENT_LENGTH'] = 5 * 1024 * 1024
-
-db.init_app(app)
-migrate = Migrate(app, db)
-init_login_manager(app)
-
-app.register_blueprint(auth_bp)
-app.register_blueprint(user_bp)
-app.register_blueprint(game_bp)
-
-@app.context_processor
-def inject_getattr():
-    return dict(getattr=getattr)
-
-@app.route('/')
-def index():
-    latest_games = get_items(Game, per_page=5)
-    return render_template('index.html', latest_games=latest_games)
+app = create_app()

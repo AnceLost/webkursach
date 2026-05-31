@@ -16,7 +16,7 @@ def search_games(title_contains: str = None,
         )
     query = query.order_by(db.desc(Game.id))
     pagination = db.paginate(query, page=page, per_page=per_page)
-    return pagination.items
+    return pagination
 
 def create_game(title: str, 
                 description: str,

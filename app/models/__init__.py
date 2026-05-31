@@ -15,6 +15,7 @@ __all__ = [
     "Game",
     "Platform",
     "Genre",
+    "Review"
     "GamePlatform",
     "GameGenre"
 ]

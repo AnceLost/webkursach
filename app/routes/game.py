@@ -3,7 +3,7 @@ from pathlib import Path
 from flask_login import current_user
 
 from .base import *
-from app.crud.game_crud import create_game as cg
+from app.crud.game_crud import create_game as cg, search_games
 from app.crud.review_crud import create_review, get_self_review, get_pagination_reviews_for_games
 
 
@@ -34,7 +34,7 @@ def create():
         release_date = form.release_date.data
     
         selected_platforms = get_items_by_ids(Platform, form.platforms.data)
-        selected_genres = get_items_by_ids(Genre, form.genres.data)   
+        selected_genres = get_items_by_ids(Genre, form.genres.data)
 
         try:
             image = form.image.data
@@ -105,10 +105,7 @@ def add_review(game_id: int):
     form = ReviewForm()
     
     if form.validate_on_submit():
-        if not current_user.is_authenticated:
-            flash('Войдите, чтобы оставить отзыв.', 'warning')
-            return redirect(url_for('auth.login'))
-        
+        user_review = get_self_review(current_user.id, game_id)
         if user_review:
             flash('Вы уже оставили отзыв на эту игру.', 'warning')
             return redirect(url_for('game.profile', game_id=game_id))
@@ -131,4 +128,33 @@ def add_review(game_id: int):
     
 @bp.route('/search')
 def search():
-    pass
+    title_query = request.args.get('q', '').strip()
+    genre_ids_str = request.args.getlist('genres')  # поддерживает множественные параметры ?genres=1&genres=2
+    page = request.args.get('page', 1, type=int)
+
+    # Преобразуем строковые id в целые
+    genre_ids = []
+    for gid in genre_ids_str:
+        try:
+            genre_ids.append(int(gid))
+        except ValueError:
+            pass
+
+    games = search_games(
+        title_contains=title_query if title_query else None,
+        genre_ids=genre_ids if genre_ids else None,
+        page=page,
+        per_page=20
+    )
+
+    # Для отображения фильтра жанров передадим все жанры
+    all_genres = get_items(Genre, per_page=100)
+
+    return render_template(
+        'game/search.html',
+        games=games,
+        title_query=title_query,
+        selected_genre_ids=genre_ids,
+        all_genres=all_genres,
+        page=page
+    )

@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block title %}Поиск игр{% endblock %}
+
+{% block content %}
+<h2>Поиск игр</h2>
+<form method="get" action="{{ url_for('game.search') }}" class="row g-3 mb-4">
+    <div class="col-md-6">
+        <input type="text" name="q" class="form-control" placeholder="Название игры" value="{{ title_query }}">
+    </div>
+    <div class="col-md-4">
+        <select name="genres" multiple class="form-select" size="4">
+            {% for genre in all_genres %}
+            <option value="{{ genre.id }}" {% if genre.id in selected_genre_ids %}selected{% endif %}>{{ genre.name }}</option>
+            {% endfor %}
+        </select>
+        <small class="text-muted">Удерживайте Ctrl для выбора нескольких</small>
+    </div>
+    <div class="col-md-2">
+        <button type="submit" class="btn btn-primary w-100">Найти</button>
+    </div>
+</form>
+
+{% if games.items %}
+    <div class="row row-cols-1 row-cols-md-4 g-4">
+        {% for game in games.items %}
+            <div class="col">
+                <div class="card h-100">
+                    <img src="{{ game.cover_uri }}" class="card-img-top" alt="{{ game.title }}">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ game.title }}</h5>
+                        <p class="card-text">{{ game.average_rating }} ({{ game.review_count }})</p>
+                        <a href="{{ url_for('game.profile', game_id=game.id) }}" class="btn btn-outline-primary btn-sm">Подробнее</a>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+
+    <nav aria-label="Page navigation" class="mt-4">
+        <ul class="pagination justify-content-center">
+            {% for page_num in games.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=3) %}
+                {% if page_num %}
+                    <li class="page-item {% if page_num == games.page %}active{% endif %}">
+                        <a class="page-link" href="{{ url_for('game.search', q=title_query, genres=selected_genre_ids, page=page_num) }}">{{ page_num }}</a>
+                    </li>
+                {% else %}
+                    <li class="page-item disabled"><span class="page-link">…</span></li>
+                {% endif %}
+            {% endfor %}
+        </ul>
+    </nav>
+{% else %}
+    <div class="alert alert-warning">Игр по вашему запросу не найдено.</div>
+{% endif %}
+{% endblock %}

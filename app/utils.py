@@ -4,7 +4,7 @@ from typing import Callable
 from functools import wraps
 
 from PIL import Image
-from flask import current_app, redirect, url_for, abort
+from flask import current_app, redirect, url_for, abort, flash
 from flask_login import current_user
 
 from app.exceptions import FileSaveError, FileDeleteError
@@ -55,7 +55,7 @@ def save_image(image, path_to_img_dir: str, converter: Converter = None) -> [str
         img.save(image_path, 'JPEG', quality=85)  # сохраняем как JPEG для единообразия
 
         return image_path, image_fn
-    except OSError as e:
+    except Exception as e:
         raise FileSaveError(f"Не удалось сохранить изображение: {e}") from e
 
 def delete_image(file_path: str):
