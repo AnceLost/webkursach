@@ -105,3 +105,6 @@ class ReviewForm(FlaskForm):
 class BanForm(FlaskForm):
     action = HiddenField('action', validators=[DataRequired()])
     submit = SubmitField('Забанить/Разбанить')
+    
+class DeleteForm(FlaskForm):
+    submit = SubmitField('Удалить что-то')

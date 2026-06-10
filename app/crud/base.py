@@ -7,7 +7,9 @@ from app.exceptions import (DatabaseUpdateError,
                             DatabaseNotFoundError, 
                             DatabaseCreateEntityError, 
                             DatabaseDeleteEntityError,
-                            DatabaseError)
+                            DatabaseError,
+                            FileDeleteError,
+                            FileSaveError)
 
 T = TypeVar('T', bound=Base)
 
@@ -36,3 +38,12 @@ def get_items_by_ids(model: type[T], ids: List[int]) -> List[T]:
     """Возвращает список объектов модели model с id, входящими в ids."""
     if not ids: return []
     return db.session.query(model).filter(model.id.in_(ids)).all()
+
+def delete_item(model: type[T], item_id: int):
+    try:
+        item = get_item(model, item_id)
+        db.session.delete(item)
+        db.session.commit()
+    except SQLAlchemyError as e:
+        db.session.rollback()
+        raise DatabaseDeleteEntityError(f"Не удалось удалить коментарий: {e}") from e

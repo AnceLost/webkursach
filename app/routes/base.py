@@ -8,8 +8,8 @@ from flask import (
     flash, make_response, Blueprint, current_app, abort)
 
 from app.models import User, Game, Platform, Genre, Review
-from app.crud.base import get_item, get_items, get_items_by_ids
-from app.forms import ImageForm, CreateGameForm, ReviewForm, BanForm
+from app.crud.base import get_item, get_items, get_items_by_ids, delete_item
+from app.forms import ImageForm, CreateGameForm, ReviewForm, BanForm, DeleteForm
 from app.utils import AvatarConverter, save_image, delete_image, check_permissions, check_not_banned
 from app.exceptions import (ApplicationError, 
                             FileDeleteError, 

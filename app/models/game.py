@@ -1,4 +1,5 @@
 from .base import *
+
 from sqlalchemy.ext.associationproxy import association_proxy, AssociationProxy
 
 class Game(Base):

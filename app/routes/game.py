@@ -3,7 +3,7 @@ from pathlib import Path
 from flask_login import current_user
 
 from .base import *
-from app.crud.game_crud import create_game as cg, search_games
+from app.crud.game_crud import create_game as cg, search_games, delete_game as delete_game_crud
 from app.crud.review_crud import create_review, get_self_review, get_pagination_reviews_for_games
 
 
@@ -77,10 +77,15 @@ def profile(game_id):
         abort(404)
     form = ReviewForm()
     
+    adminMode = False
+    deleteForm = None
     # Проверяем, оставил ли текущий пользователь уже отзыв
     user_review = None
     if current_user.is_authenticated:
         user_review = get_self_review(current_user.id, game_id)
+        if current_user.role.value >= 20:
+            adminMode = True
+            deleteForm = DeleteForm()
 
     page = request.args.get('page', 1, type=int)    
     reviews = get_pagination_reviews_for_games(game_id, page=page, per_page=5)
@@ -92,7 +97,9 @@ def profile(game_id):
                            form=form,
                            page=page,
                            has_next_page=reviews.has_next,
-                           user_has_banned=banned)
+                           user_has_banned=banned,
+                           adminMode=adminMode,
+                           deleteForm=deleteForm)
 
 @bp.route('/<int:game_id>/add_review', methods=['POST'])
 @login_required
@@ -124,6 +131,22 @@ def add_review(game_id: int):
             print(e)
         return redirect(url_for('game.profile', game_id=game_id))
     
+    return redirect(url_for('game.profile', game_id=game_id))
+
+@bp.route('/<int:game_id>/delete_review/<int:review_id>', methods=['POST'])
+def delete_review(game_id:int, review_id: int):
+    review = get_item(Review, review_id)
+    if review is None:
+        abort(404)
+
+    if not (current_user.id == review.user_id or current_user.role.value >= 20):
+        abort(403)    
+        
+    try:
+        delete_item(Review, review_id)
+    except DatabaseDeleteEntityError as e:
+        current_app.logger.error(f"Не получилось удалить коментарий: {e}")
+        flash('Не получилось удалить коментарий', 'danger')
     return redirect(url_for('game.profile', game_id=game_id))
     
 @bp.route('/search')
@@ -158,3 +181,19 @@ def search():
         all_genres=all_genres,
         page=page
     )
+    
+@bp.route('/<int:game_id>/delete', methods=["POST"])
+@login_required
+@check_permissions(20)
+def delete_game(game_id: int):
+    game = get_item(Game, game_id)
+    if game is None:
+        abort(404)
+        
+    try:
+        delete_game_crud(game_id)
+    except DatabaseDeleteEntityError as del_err:
+        current_app.logger.error(f"Не получилось удалить игру: {del_err}")
+        flash('Не получилось удалить игру', 'danger')
+    return redirect(url_for('index'))    
+    

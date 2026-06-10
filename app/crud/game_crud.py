@@ -1,6 +1,7 @@
 from datetime import datetime
 
 from .base import *
+from app.utils import delete_image
 
 def search_games(title_contains: str = None, 
                  genre_ids: List[int] = None, 
@@ -81,12 +82,32 @@ def update_game_cover(game_id: int, new_cover):
         raise DatabaseUpdateError(f"Ошибка БД при обновлении обложки у игры: {e}") from e
     
     
-def delete_game(game_id):
-    """Удаляет игру по id"""
+def delete_game(game_id: int):
+    """Удаление игры"""
+    game: Game = get_item(Game, game_id)
+    if not game:
+        abort(404)
+        
+    # Сначала удаляем все отзывы у игры
     try:
-        game = get_game(game_id)
+        db.session.execute(db.delete(Review).where(Review.game_id==game_id))
+    except SQLAlchemyError as e:
+        db.session.rollback()
+        raise DatabaseDeleteEntityError(f"Не получилось удалить коментарии пользователя") from e
+    
+    try:
+        # если у игры нестандартная обложка, то её нужно удалить вместе с ней
+        if game.cover_path != "defaultcover.jpg":
+            delete_image(game.cover_uri)
+    except FileDeleteError as e:
+        db.session.rollback()
+        raise DatabaseDeleteEntityError(f"Не получилось удалить аватарку пользователя") from e
+
+    try:
         db.session.delete(game)
         db.session.commit()
     except SQLAlchemyError as e:
         db.session.rollback()
-        raise DatabaseDeleteEntityError(f"Не удалось удалить игру: {e}") from e
+        raise DatabaseDeleteEntityError(f"Не получилось удалить пользователя") from e
+    
+    

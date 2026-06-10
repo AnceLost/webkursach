@@ -39,16 +39,25 @@
             {% endif %}
         </div>
     </div>
-    {% if adminMode %}
-        <form method="POST" action="{{url_for('user.toggle_ban', user_id=user.id)}}" style="display: inline;">
-            {{ form.hidden_tag() }}
-            {{ form.action }}
-            {{ form.submit }}
-        </form>
-    {% endif %}
+
     <p><a href="{{url_for('user.personal_tierlist', user_id=user.id)}}">Моя таблица оценок</a></p>
-    {% if selfprofile %} 
+    {% if selfprofile or adminMode %} 
         <p><a href="{{url_for('user.change_password', user_id=user.id)}}">Сменить пароль</a></p>
     {% endif %}
-    
+
+    {% if adminMode or selfprofile %}
+        <div style="margin-top: 200px;">
+            {% if adminMode %}
+                <form method="POST" action="{{url_for('user.toggle_ban', user_id=user.id)}}" style="display: inline;">
+                    {{ form.hidden_tag() }}
+                    {{ form.action }}
+                    {{ form.submit }}
+                </form>
+            {% endif %}
+            <form method="POST" action="{{url_for('user.delete_user', user_id=user.id)}}" style="display: inline;">
+                {{ delform.hidden_tag() }}
+                {{ delform.submit(class="btn btn-primary") }}
+            </form>
+        </div>
+    {% endif %}
 {% endblock %}

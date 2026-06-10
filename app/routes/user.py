@@ -5,7 +5,7 @@ from flask_wtf.file import FileRequired
 
 from .base import *
 from app.forms import ChangePasswordForm
-from app.crud.user_crud import update_user_avatar, change_user_password, ban_user, unban_user
+from app.crud.user_crud import update_user_avatar, change_user_password, ban_user, unban_user, delete_user as du
 from app.crud.review_crud import get_reviews_with_game 
 
 bp = Blueprint('user', __name__, url_prefix='/user')
@@ -21,15 +21,26 @@ def user_info(user_id):
 @bp.route('/<int:user_id>/profile')
 @login_required
 def profile(user_id):
+    user = get_item(User, user_id)
+    if not user:
+        abort(404)
+        
     selfprofile = True
     form = None
-    adminMode = current_user.role.value >= 20
-    user = current_user
-    if user.id != user_id:
-        user = get_item(User, user_id)
+    delform = None
+    adminMode = user.role.value >= 20
+    
+    if user_id != current_user.id:
         selfprofile = False
         
-    if adminMode: 
+    if adminMode or selfprofile: 
+        delform = DeleteForm()
+        delform.submit.label.text = 'Удалить Пользователя'
+        delform.submit.render_kw = {
+                'class': 'btn btn-warning btn-sm',
+                'onclick': "return confirm('Удалить пользователя? Все его отзывы будут удалены!');"
+            }
+    if adminMode:
         form = BanForm()
         if user.banned:
             form.action.data = 'unban'
@@ -42,8 +53,7 @@ def profile(user_id):
                 'class': 'btn btn-warning btn-sm',
                 'onclick': "return confirm('Забанить пользователя? Все его отзывы будут удалены!');"
             }
-    
-    return render_template('user/profile.html', user=user, selfprofile=selfprofile, adminMode=adminMode, form=form)
+    return render_template('user/profile.html', user=user, selfprofile=selfprofile, adminMode=adminMode, form=form, delform=delform)
 
 @bp.route('/<int:user_id>/profile/personal-tierlist')
 @login_required
@@ -68,6 +78,9 @@ def personal_tierlist(user_id):
 @bp.route('/<int:user_id>/profile/change-avatar', methods=['GET', 'POST'])
 @login_required
 def change_avatar(user_id):
+    user: User = get_item(User, user_id)
+    if not user:
+        abort(404)
     #аватарку может поменять модер, админ или сам пользователь
     if (current_user.id != user_id and current_user.role.value < 10):
         abort(403)  # доступ запрещён
@@ -80,8 +93,8 @@ def change_avatar(user_id):
             avatar_path, avatar_filename = save_image(image, 'static/upload/avatars/', AvatarConverter())
             
             #берем старый путь до аватарки чтобы удалить, если обновление пройдет успешно
-            oldfilepath = current_user.avatar_uri
-            oldfilename = Path(oldfilepath).stem
+            oldfilepath = user.avatar_uri
+            oldfilename = user.avatar_path
             
             update_user_avatar(user_id, avatar_filename)
             
@@ -148,3 +161,15 @@ def toggle_ban(user_id):
         flash("Не удалось забанить/разбанить пользователя", 'danger')
         current_app.logger.error(e)
     return redirect(url_for('user.profile', user_id=user_id))
+
+@bp.route('/<int:user_id>/delete', methods=["POST"])
+@login_required
+def delete_user(user_id: int):
+    if current_user.role.value < 20 and current_user.id != user_id:
+        abort(403)
+    try:
+        du(user_id)
+    except DatabaseDeleteEntityError as e:
+        flash(e)
+    return redirect(url_for('index'))
+    

@@ -14,6 +14,9 @@
         <div class="collapse navbar-collapse">
           <ul class="navbar-nav ms-auto">
             {% if current_user.is_authenticated %}
+            {% if current_user.role.value >= 20 %}
+              <li class="nav-item"><a class="nav-link" href="{{ url_for('admin.index') }}">Админка</a></li>
+            {% endif %}
               <li class="nav-item"><a class="nav-link" href="{{ url_for('user.profile', user_id=current_user.id) }}">Мой профиль</a></li>
               <li class="nav-item"><a class="nav-link" href="{{ url_for('auth.logout') }}">Выйти</a></li>
             {% else %}
@@ -38,5 +41,6 @@
     </main>
     
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    {%block scripts%}{%endblock%}
   </body>
 </html>

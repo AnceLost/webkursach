@@ -1,4 +1,5 @@
 from .base import *
+from utils import delete_image
 
 def get_user_by_login(login: str) -> User | None:
     """Возвращает пользователя по login"""
@@ -74,11 +75,31 @@ def update_user_avatar(user_id: int, new_avatar_path: str):
 
 def delete_user(user_id: int):
     """Удаление пользователя"""
-    user = get_item(User, user_id)
+    user: User = get_item(User, user_id)
+    if not user:
+        abort(404)
     # Сначала удаляем все отзывы пользователя
-    db.delete(Review).where(Review.user_id==user_id)
-    db.session.delete(user)
-    db.session.commit()
+    try:
+        db.session.execute(db.delete(Review).where(Review.user_id==user_id))
+    except SQLAlchemyError as e:
+        db.session.rollback()
+        raise DatabaseDeleteEntityError(f"Не получилось удалить коментарии пользователя") from e
+    
+    try:
+        # если пользователь загружал какую-то аватарку, то её нужно удалить вместе с ним
+        if user.avatar_path != "defaultavatar.jpg":
+            delete_image(user.avatar_uri)
+    except FileDeleteError as e:
+        db.session.rollback()
+        raise DatabaseDeleteEntityError(f"Не получилось удалить аватарку пользователя") from e
+
+    try:
+        db.session.delete(user)
+        db.session.commit()
+    except SQLAlchemyError as e:
+        db.session.rollback()
+        raise DatabaseDeleteEntityError(f"Не получилось удалить пользователя") from e 
+    
     
 def change_user_password(user_id: int, oldpass: str, newpass: str) -> bool:
     try:

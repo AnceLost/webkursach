@@ -32,6 +32,13 @@
     </div>
 </div>
 
+{% if adminMode %}
+    <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteGameModal">
+        <i class="bi bi-trash"></i> Удалить игру
+    </button>
+    {%include 'game/_delete_game_modal.html'%}
+{%endif%}
+
 <hr>
 
 <h3>Отзывы</h3>
@@ -40,6 +47,11 @@
     {% if user_review %}
         <div class="alert alert-info">
             <strong>Ваш отзыв:</strong>{{ user_review.mark }} — {{ user_review.text }}
+            <button type="button" class="btn btn-danger btn-sm btn-delete-review"
+                data-action-url="{{ url_for('game.delete_review', game_id=game.id, review_id=user_review.id) }}"
+                data-bs-toggle="modal" data-bs-target="#deleteReviewModal">
+                Удалить
+            </button>
         </div>
     {% else %}
         <div class="card mb-4">
@@ -74,14 +86,38 @@
             <p class="card-text"> {{ review.mark }} </p>
             <p class="card-text"> {{ review.text }} </p>
         </div>
+        {% if adminMode %}
+            <button type="button" class="btn btn-danger btn-sm btn-delete-review"
+                data-action-url="{{ url_for('game.delete_review', game_id=game.id, review_id=review.id) }}"
+                data-bs-toggle="modal" data-bs-target="#deleteReviewModal">
+                Удалить
+            </button>
+        {% endif %}
     </div>
 {% else %}
     <div class="alert alert-light">Пока никто не оставил отзывов. Будьте первым!</div>
 {% endfor %}
+{%include 'game/_delete_review_modal.html'%}
 {% if page>1 %}
     <a href="{{url_for('game.profile', game_id=game.id, page=page-1)}}">Предыдующая страница</a>
 {% endif %}
 {% if has_next_page %}
     <a href="{{url_for('game.profile', game_id=game.id, page=page+1)}}">Следующая страница</a>
 {% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const deleteForm = document.getElementById('deleteReviewForm');
+    const modal = document.getElementById('deleteReviewModal');
+
+    modal.addEventListener('show.bs.modal', function(event) {
+        // Кнопка, которая вызвала открытие модального окна
+        const button = event.relatedTarget;
+        const actionUrl = button.getAttribute('data-action-url');
+        deleteForm.setAttribute('action', actionUrl);
+    });
+});
+</script>
 {% endblock %}

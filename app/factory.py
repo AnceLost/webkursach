@@ -38,7 +38,8 @@ def create_app(settings=None):
     # Регистрация blueprints
     from app.auth import bp as auth_bp
     app.register_blueprint(auth_bp)
-    from app.routes import game_bp, user_bp
+    from app.routes import game_bp, user_bp, admin_bp
+    app.register_blueprint(admin_bp)
     app.register_blueprint(game_bp)
     app.register_blueprint(user_bp)
     

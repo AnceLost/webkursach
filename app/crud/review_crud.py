@@ -29,5 +29,4 @@ def create_review(mark: int, content: str, user_id: int, game_id: int) -> Review
         return review
     except SQLAlchemyError as e:
         db.session.rollback()
-        raise DatabaseCreateEntityError(f"Не удалось создать коментарий: {e}")
-        
+        raise DatabaseCreateEntityError(f"Не удалось создать коментарий: {e}") from e

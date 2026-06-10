@@ -11,7 +11,13 @@
         <!-- Поля формы -->
         {{ render_form_field(form.login) }}
         {{ render_form_field(form.password) }}
-        {{ render_form_field(form.remember_me)}}
+        <div class="mb-3">
+          {{ form.remember_me.label(class="form-check-label") }}
+          {{ form.remember_me(class="form-check-input") }}
+          {% for error in form.remember_me.errors %}
+            <div class="text-danger">{{ error }}</div>
+          {% endfor %}
+        </div>
       
       <div class="d-grid">
         {{ form.submit(class="btn btn-primary") }}
