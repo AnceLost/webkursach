@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block title %}Журнал входов{% endblock %}
+{% block content %}
+<h2>Последние входы</h2>
+<table class="table table-striped">
+    <thead><tr><th>Время</th><th>Пользователь</th><th>IP</th></tr></thead>
+    <tbody>
+    {% for entry in logs %}
+    <tr>
+        <td>{{ entry.timestamp.strftime('%d.%m.%Y %H:%M') }}</td>
+        <td>{{ entry.user.login if entry.user else 'Гость' }}</td>
+        <td>{{ entry.ip_address }}</td>
+    </tr>
+    {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

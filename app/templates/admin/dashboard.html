@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}Админ-панель{% endblock %}
+{% block content %}
+<h2>Административная панель</h2>
+<div class="list-group">
+    <a href="{{ url_for('admin.users') }}" class="list-group-item list-group-item-action">Пользователи</a>
+    <a href="{{ url_for('admin.games') }}" class="list-group-item list-group-item-action">Игры</a>
+    <a href="{{ url_for('admin.genres') }}" class="list-group-item list-group-item-action">Жанры</a>
+    <a href="{{ url_for('admin.platforms') }}" class="list-group-item list-group-item-action">Платформы</a>
+    <a href="{{ url_for('admin.access_log') }}" class="list-group-item list-group-item-action">Журнал входов</a>
+</div>
+{% endblock %}
+

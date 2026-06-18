@@ -6,6 +6,7 @@ from app.models import User
 from forms import RegistrationForm, LoginForm
 from crud.user_crud import create_user, get_user_by_login
 from crud.base import get_item
+from crud.access_log_crud import create_access_log
 
 bp = Blueprint('auth', __name__, url_prefix='/auth')
 
@@ -31,6 +32,7 @@ def login():
             user = get_user_by_login(login)
             if user and user.check_password(password):
                 login_user(user)
+                log = create_access_log(user.id, request.remote_addr)
                 flash('Вы успешно аутентифицированы.', 'success')
                 next = request.args.get('next')
                 return redirect(next or url_for('index'))

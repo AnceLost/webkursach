@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}Пользователи{% endblock %}
+{% block content %}
+<h2>Пользователи</h2>
+<table class="table table-striped">
+    <thead><tr><th>ID</th><th>Логин</th><th>Действия</th></tr></thead>
+    <tbody>
+    {% for user in users %}
+    <tr>
+        <td>{{ user.id }}</td>
+        <td>{{ user.login }}</td>
+        <td>
+            <a href="{{ url_for('user.profile', user_id=user.id) }}" class="btn btn-sm btn-outline-primary">Профиль</a>
+            {% if current_user.id != user.id %}
+                {% if user.banned %}
+                <form method="POST" action="{{ url_for('user.toggle_ban', user_id=user.id) }}" style="display:inline">
+                    <input type="hidden" name="action" value="unban">
+                    <button class="btn btn-sm btn-success">Разбанить</button>
+                </form>
+                {% else %}
+                <form method="POST" action="{{ url_for('user.toggle_ban', user_id=user.id) }}" style="display:inline" onsubmit="return confirm('Забанить пользователя?')">
+                    <input type="hidden" name="action" value="ban">
+                    <button class="btn btn-sm btn-warning">Забанить</button>
+                </form>
+                {% endif %}
+            {% endif %}
+            <form method="POST" action="{{url_for('user.delete_user', user_id=user.id)}}" style="display: inline;" onsubmit="return confirm('Удалить пользователя?')">
+                {{ delform.hidden_tag() }}
+                {{ delform.submit(class="btn btn-primary") }}
+            </form>
+        </td>
+    </tr>
+    {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

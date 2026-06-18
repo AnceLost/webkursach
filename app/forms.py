@@ -3,7 +3,7 @@ import datetime
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileField, FileAllowed, FileRequired
 from wtforms import StringField, PasswordField, SubmitField, BooleanField, DateField, TextAreaField, SelectMultipleField, SelectField, HiddenField
-from wtforms.validators import DataRequired, Email, EqualTo, Length, ValidationError
+from wtforms.validators import DataRequired, Email, EqualTo, Length, ValidationError, Optional
 from app.models import User
 from crud.user_crud import get_user_by_login, get_user_by_email
 
@@ -90,9 +90,9 @@ class CreateGameForm(ImageForm):
         Length(max=200)    
     ])
     description = TextAreaField('Описание')
-    release_date = DateField('Дата релиза', default=datetime.date.today)
-    platforms = SelectMultipleField('Платформы', coerce=int)
-    genres = SelectMultipleField('Жанры', coerce=int)
+    release_date = DateField('Дата выхода', format='%Y-%m-%d', validators=[Optional()])
+    platforms = SelectMultipleField('Платформы', coerce=int, validators=[DataRequired()])
+    genres = SelectMultipleField('Жанры', coerce=int, validators=[DataRequired()])
     
 class ReviewForm(FlaskForm):
     mark = SelectField('Оценка', 
@@ -106,5 +106,13 @@ class BanForm(FlaskForm):
     action = HiddenField('action', validators=[DataRequired()])
     submit = SubmitField('Забанить/Разбанить')
     
+class GenreForm(FlaskForm):
+    name = StringField('Название', validators=[DataRequired(), Length(max=100)])
+    submit = SubmitField('Сохранить')
+    
+class PlatformForm(FlaskForm):
+    name = StringField('Название', validators=[DataRequired(), Length(max=100)])
+    submit = SubmitField('Сохранить')
+
 class DeleteForm(FlaskForm):
     submit = SubmitField('Удалить что-то')

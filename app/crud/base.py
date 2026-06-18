@@ -1,8 +1,8 @@
 from sqlalchemy.exc import SQLAlchemyError
 from typing import TypeVar, Optional
 
-from app.dbhelper import db
-from app.models import User, Game, Genre, Platform, Base, Review
+from app.dbhelper import db, Base
+from app.models import User, Game, Genre, Platform, Review, AccessLog
 from app.exceptions import (DatabaseUpdateError, 
                             DatabaseNotFoundError, 
                             DatabaseCreateEntityError, 
@@ -46,4 +46,4 @@ def delete_item(model: type[T], item_id: int):
         db.session.commit()
     except SQLAlchemyError as e:
         db.session.rollback()
-        raise DatabaseDeleteEntityError(f"Не удалось удалить коментарий: {e}") from e
+        raise DatabaseDeleteEntityError(f"Не удалось удалить объект модели<{model}>: {e}") from e

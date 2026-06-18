@@ -1,0 +1,19 @@
+<div class="modal fade" id="deleteGenreModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Подтверждение удаления</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                Удалить жанр «<span id="deleteGenreName"></span>»?
+            </div>
+            <div class="modal-footer">
+                <form id="deleteGenreForm" method="POST" action="">
+                    {{ delete_form.hidden_tag() }}
+                    <button type="submit" class="btn btn-danger">Удалить</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

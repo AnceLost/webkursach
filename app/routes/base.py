@@ -9,7 +9,7 @@ from flask import (
 
 from app.models import User, Game, Platform, Genre, Review
 from app.crud.base import get_item, get_items, get_items_by_ids, delete_item
-from app.forms import ImageForm, CreateGameForm, ReviewForm, BanForm, DeleteForm
+from app.forms import ImageForm, CreateGameForm, ReviewForm, BanForm, DeleteForm, GenreForm, PlatformForm
 from app.utils import AvatarConverter, save_image, delete_image, check_permissions, check_not_banned
 from app.exceptions import (ApplicationError, 
                             FileDeleteError, 
@@ -17,4 +17,5 @@ from app.exceptions import (ApplicationError,
                             DatabaseUpdateError, 
                             DatabaseError,
                             DatabaseCreateEntityError,
-                            DatabaseDeleteEntityError)
+                            DatabaseDeleteEntityError,
+                            DatabaseNotFoundError)

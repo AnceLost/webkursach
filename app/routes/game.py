@@ -3,7 +3,7 @@ from pathlib import Path
 from flask_login import current_user
 
 from .base import *
-from app.crud.game_crud import create_game as cg, search_games, delete_game as delete_game_crud
+from app.crud.game_crud import create_game as cg, search_games, delete_game as delete_game_crud, update_game
 from app.crud.review_crud import create_review, get_self_review, get_pagination_reviews_for_games
 
 
@@ -69,6 +69,77 @@ def create():
         return redirect(url_for('game.create'))
     
     return render_template('game/create.html', form=form)
+
+@bp.route('/<int:game_id>/edit', methods=['GET', 'POST'])
+@login_required
+@check_permissions(10)
+def edit(game_id):
+    game: Game = get_item(Game, game_id)
+    if game is None:
+        abort(404)
+
+    form = CreateGameForm(obj=game)
+    form.platforms.choices = [(p.id, p.name) for p in get_items(Platform, per_page=200)]
+    form.genres.choices = [(g.id, g.name) for g in get_items(Genre, per_page=200)]
+
+    if request.method == 'GET':
+        form.platforms.data = [p.id for p in game.platforms]
+        form.genres.data = [g.id for g in game.genres]
+
+    if form.validate_on_submit():
+        # Получаем выбранные платформы и жанры сразу (независимо от наличия обложки)
+        selected_platforms = get_items_by_ids(Platform, form.platforms.data)
+        selected_genres = get_items_by_ids(Genre, form.genres.data)
+
+        new_cover_filename = None
+        new_cover_full_path = None
+        old_cover_relative_path = None
+
+        if form.image.data:
+            try:
+                new_cover_full_path, new_cover_filename = save_image(
+                    form.image.data, 'static/upload/covers/', AvatarConverter()
+                )
+                # Запоминаем старый файл для удаления только после успешного обновления БД
+                if game.cover_path and game.cover_path != 'defaultcover.jpg':
+                    old_cover_relative_path = f'static/upload/covers/{game.cover_path}'
+            except FileSaveError as e:
+                flash('Не удалось сохранить новую обложку.', 'danger')
+                current_app.logger.error(f"Ошибка загрузки обложки: {e}")
+                return render_template('game/edit.html', form=form, game=game)
+
+        try:
+            update_game(
+                game_id=game_id,
+                new_title=form.title.data,
+                new_desc=form.description.data,         
+                new_release_date=form.release_date.data,
+                new_platforms=selected_platforms,
+                new_genres=selected_genres,
+                new_cover=new_cover_filename
+            )
+        except (DatabaseUpdateError, DatabaseNotFoundError) as dberr:
+            # Откат сохранённой обложки, если была
+            if new_cover_full_path:
+                try:
+                    delete_image(new_cover_full_path)
+                except FileDeleteError as del_err:
+                    current_app.logger.error(f"Не удалось удалить новую обложку после ошибки БД: {del_err}")
+            flash('Не удалось обновить игру.', 'danger')
+            current_app.logger.error(f"Ошибка обновления игры: {dberr}")
+            return render_template('game/edit.html', form=form, game=game)
+
+        #удаление старой обложки только после успешного коммита 
+        if old_cover_relative_path:
+            try:
+                delete_image(old_cover_relative_path)
+            except FileDeleteError as e:
+                current_app.logger.warning(f"Не удалось удалить старую обложку: {e}")
+
+        flash('Игра успешно обновлена!', 'success')
+        return redirect(url_for('game.profile', game_id=game.id))
+
+    return render_template('game/edit.html', form=form, game=game)
 
 @bp.route('/<int:game_id>/profile', methods=['GET'])
 def profile(game_id):

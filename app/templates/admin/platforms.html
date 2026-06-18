@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% block title %}Платформы{% endblock %}
+{% block content %}
+<h2>Платформы</h2>
+<button type="button" class="btn btn-success mb-3" data-bs-toggle="modal" data-bs-target="#createPlatformModal">
+    Добавить платформу
+</button>
+<table class="table table-striped">
+    <thead><tr><th>ID</th><th>Название</th><th>Действия</th></tr></thead>
+    <tbody>
+    {% for platform in platforms %}
+    <tr>
+        <td>{{ platform.id }}</td>
+        <td>{{ platform.name }}</td>
+        <td>
+            <button type="button" class="btn btn-sm btn-outline-secondary btn-edit-platform"
+                    data-action-url="{{ url_for('platform.edit', platform_id=platform.id) }}"
+                    data-platform-name="{{ platform.name }}"
+                    data-bs-toggle="modal" data-bs-target="#editPlatformModal">
+                Изменить
+            </button>
+            <button type="button" class="btn btn-sm btn-outline-danger btn-delete-platform"
+                    data-action-url="{{ url_for('platform.delete', platform_id=platform.id) }}"
+                    data-platform-name="{{ platform.name }}"
+                    data-bs-toggle="modal" data-bs-target="#deletePlatformModal">
+                Удалить
+            </button>
+        </td>
+    </tr>
+    {% endfor %}
+    </tbody>
+</table>
+
+<!-- Модальное окно создания -->
+{% include 'platform/_create_platform_modal.html'%}
+
+<!-- Модальное окно редактирования -->
+{%include 'platform/_edit_platform_modal.html'%}
+
+<!-- Модальное окно удаления -->
+{%include 'platform/_delete_platform_modal.html'%}
+
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // для редактирования
+    const editModal = document.getElementById('editPlatformModal');
+    const editForm = document.getElementById('editPlatformForm');
+    const editNameInput = document.getElementById('editPlatformName');
+
+    editModal.addEventListener('show.bs.modal', function(event) {
+        const button = event.relatedTarget; // кнопка, открывшая модалку
+        const actionUrl = button.getAttribute('data-action-url');
+        const platformName = button.getAttribute('data-platform-name');
+
+        editForm.action = actionUrl;
+        editNameInput.value = platformName;
+    });
+
+    // для удаления (тоже самое, только id другие)
+    const deleteModal = document.getElementById('deletePlatformModal');
+    const deleteForm = document.getElementById('deletePlatformForm');
+    const deleteNameSpan = document.getElementById('deletePlatformName');
+
+    deleteModal.addEventListener('show.bs.modal', function(event) {
+        const button = event.relatedTarget;
+        const actionUrl = button.getAttribute('data-action-url');
+        const platformName = button.getAttribute('data-platform-name');
+
+        deleteForm.action = actionUrl;
+        deleteNameSpan.textContent = platformName;
+    });
+});
+</script>
+{% endblock %}

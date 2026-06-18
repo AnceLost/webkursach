@@ -33,7 +33,11 @@
 </div>
 
 {% if adminMode %}
-    <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteGameModal">
+    <a href="{{url_for('game.edit', game_id=game.id)}}" class="btn btn-primary">Редактировать</a>
+    <button type="button" class="btn btn-sm btn-outline-danger"
+                data-action-url="{{ url_for('game.delete_game', game_id=game.id) }}"
+                data-game-title="{{game.title}}" 
+                data-bs-toggle="modal" data-bs-target="#deleteGameModal">
         <i class="bi bi-trash"></i> Удалить игру
     </button>
     {%include 'game/_delete_game_modal.html'%}
@@ -107,17 +111,33 @@
 {% endblock %}
 
 {% block scripts %}
+{{ super() }}
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    const deleteForm = document.getElementById('deleteReviewForm');
-    const modal = document.getElementById('deleteReviewModal');
+    const deleteFormReview = document.getElementById('deleteReviewForm');
+    const modalReview = document.getElementById('deleteReviewModal');
 
-    modal.addEventListener('show.bs.modal', function(event) {
+    modalReview.addEventListener('show.bs.modal', function(event) {
         // Кнопка, которая вызвала открытие модального окна
         const button = event.relatedTarget;
         const actionUrl = button.getAttribute('data-action-url');
-        deleteForm.setAttribute('action', actionUrl);
+        deleteFormReview.setAttribute('action', actionUrl);
     });
+
+
+    const deleteFormGame = document.getElementById('deleteGameForm');
+    const spanTitle = document.getElementById('gameTitleSpan');
+    const modalGame = document.getElementById('deleteGameModal');
+
+    modalGame.addEventListener('show.bs.modal', function(event) {
+        // Кнопка, которая вызвала открытие модального окна
+        const button = event.relatedTarget;
+        const actionUrl = button.getAttribute('data-action-url');
+        const title = button.getAttribute('data-game-title');
+        deleteFormGame.setAttribute('action', actionUrl);
+        spanTitle.textContent = title
+    });
+
 });
 </script>
 {% endblock %}

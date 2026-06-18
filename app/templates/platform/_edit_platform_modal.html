@@ -1,0 +1,22 @@
+<div class="modal fade" id="editPlatformModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Редактировать платформу</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="editPlatformForm" method="POST" action="">
+                {{ edit_form.hidden_tag() }}
+                <div class="modal-body">
+                    <div class="mb-3">
+                        {{ edit_form.name.label(class="form-label") }}
+                        {{ edit_form.name(class="form-control", id="editPlatformName") }}
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary">Сохранить</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

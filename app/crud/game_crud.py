@@ -10,7 +10,7 @@ def search_games(title_contains: str = None,
     """Поиск игр по названию, жанрам"""
     query = db.select(Game)
     if title_contains:
-        query = query.where(Game.title.contains(title_contains))
+        query = query.where(Game.title.contains(title_contains.lower()))
     if genre_ids:
         query = query.where(
             Game.genres.any(Genre.id.in_(genre_ids))
@@ -43,43 +43,32 @@ def create_game(title: str,
         db.session.rollback()
         raise DatabaseCreateEntityError(f"Не получилось добавить игру: {e}") from e
     
-
-def update_game(game_id: int,
-                new_title: str = None,
-                new_description: str = None,
-                new_release_date: datetime = None,
-                new_platforms: List[Platform] = None,
-                new_genres: List[Genre] = None):
-    """
-    Обновляет поля модели игры
-    :param new_platforms: Сразу составляйте полный список, потому что идет замена
-    :param new_genres: Сразу составляйте полный список, потому что идет замена
-    """
+       
+def update_game(
+    game_id: int, 
+    new_title:str, 
+    new_desc: str, 
+    new_release_date: datetime, 
+    new_platforms: list[Platform], 
+    new_genres: list[Genre],
+    new_cover: str | None
+):
+    game: Game = get_item(Game, game_id)
+    if not game:
+        raise DatabaseNotFoundError(f"Нет такой игры <{game_id}>")
     try:
-        game = get_game(game_id)
-        if game:
-            if new_title: game.title = new_title
-            if new_description: game.description = new_description
-            if new_release_date: game.release_date = new_release_date
-            if new_platforms: game.platforms = new_platforms
-            if new_genres: game.genres = new_genres
-        else:
-            raise DatabaseNotFoundError(f"Нет игры с {game_id=}")
+        game.title = new_title
+        game.description = new_desc
+        game.release_date = new_release_date
+        if new_cover:
+            game.cover_path = new_cover
         
+        game.platforms = new_platforms
+        game.genres = new_genres
         db.session.commit()
     except SQLAlchemyError as e:
         db.session.rollback()
-        raise DatabaseUpdateError(f"Не получилось обновить игру: {e}") from e
-
-def update_game_cover(game_id: int, new_cover):
-    try: 
-        game = get_game(game_id)
-        if new_cover and game:
-            game.cover_path = new_cover
-            db.session.commit()
-    except SQLAlchemyError as e:
-        db.session.rollback()
-        raise DatabaseUpdateError(f"Ошибка БД при обновлении обложки у игры: {e}") from e
+        raise DatabaseUpdateError(f"Не получилось обновить игру <{game_id}>: {e}") from e
     
     
 def delete_game(game_id: int):

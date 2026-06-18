@@ -8,13 +8,13 @@ from app.models import User
 from app.crud.base import get_item
 
 def test_avatar_upload(auth_client, app, db, test_user, tmp_path):
-    # Патчим корень приложения для сохранения файлов в tmp_path
+    # патчим корень приложения для сохранения файлов в tmp_path
     avatar_dir = tmp_path / 'static' / 'upload' / 'avatars'
     avatar_dir.mkdir(parents=True, exist_ok=True)
     default_avatar = avatar_dir / 'defaultavatar.jpg'
     default_avatar.write_text('default')
 
-    # Создаем нормалюную картинку, чтобы Pillow без ошибок открыл её
+    # тестовая картинка, чтобы Pillow без ошибок открыл её
     img = PILImage.new('RGB', (1, 1), color='red')
     img_bytes = io.BytesIO()
     img.save(img_bytes, format='JPEG')
@@ -33,15 +33,14 @@ def test_avatar_upload(auth_client, app, db, test_user, tmp_path):
             follow_redirects=True
         )
         assert resp.status_code == 200
-        # Проверим, что имя файла изменилось
+        # имя файла должно измениться
         user = get_item(User, test_user.id)
         assert user.avatar_path != 'defaultavatar.jpg'
-        # Проверим, что файл создан
+        # также нужно убедиться, что файл есть сам по себе
         new_file = avatar_dir / user.avatar_path
         assert new_file.exists()
 
 def test_change_password(auth_client, test_user):
-    # Меняем пароль с корректным старым
     resp = auth_client.post(f'/user/{test_user.id}/profile/change-pass', data={
         'oldpass': 'password',
         'newpass': 'newpassword',

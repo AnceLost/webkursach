@@ -38,10 +38,12 @@ def create_app(settings=None):
     # Регистрация blueprints
     from app.auth import bp as auth_bp
     app.register_blueprint(auth_bp)
-    from app.routes import game_bp, user_bp, admin_bp
+    from app.routes import game_bp, user_bp, admin_bp, genre_bp, platform_bp
     app.register_blueprint(admin_bp)
     app.register_blueprint(game_bp)
     app.register_blueprint(user_bp)
+    app.register_blueprint(genre_bp)
+    app.register_blueprint(platform_bp)
     
     @app.context_processor
     def inject_getattr():

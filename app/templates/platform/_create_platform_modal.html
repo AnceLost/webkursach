@@ -1,0 +1,22 @@
+<div class="modal fade" id="createPlatformModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Новая платформа</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="POST" action="{{ url_for('platform.create') }}">
+                {{ create_form.hidden_tag() }}
+                <div class="modal-body">
+                    <div class="mb-3">
+                        {{ create_form.name.label(class="form-label") }}
+                        {{ create_form.name(class="form-control") }}
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary">Создать</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

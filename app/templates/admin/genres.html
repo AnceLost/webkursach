@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% block title %}Жанры{% endblock %}
+{% block content %}
+<h2>Жанры</h2>
+<button type="button" class="btn btn-success mb-3" data-bs-toggle="modal" data-bs-target="#createGenreModal">
+    Добавить жанр
+</button>
+<table class="table table-striped">
+    <thead><tr><th>ID</th><th>Название</th><th>Действия</th></tr></thead>
+    <tbody>
+    {% for genre in genres %}
+    <tr>
+        <td>{{ genre.id }}</td>
+        <td>{{ genre.name }}</td>
+        <td>
+            <button type="button" class="btn btn-sm btn-outline-secondary btn-edit-genre"
+                    data-action-url="{{ url_for('genre.edit', genre_id=genre.id) }}"
+                    data-genre-name="{{ genre.name }}"
+                    data-bs-toggle="modal" data-bs-target="#editGenreModal">
+                Изменить
+            </button>
+            <button type="button" class="btn btn-sm btn-outline-danger btn-delete-genre"
+                    data-action-url="{{ url_for('genre.delete', genre_id=genre.id) }}"
+                    data-genre-name="{{ genre.name }}"
+                    data-bs-toggle="modal" data-bs-target="#deleteGenreModal">
+                Удалить
+            </button>
+        </td>
+    </tr>
+    {% endfor %}
+    </tbody>
+</table>
+
+<!-- Модальное окно создания -->
+{% include 'genre/_create_genre_modal.html'%}
+
+<!-- Модальное окно редактирования -->
+{%include 'genre/_edit_genre_modal.html'%}
+
+<!-- Модальное окно удаления -->
+{%include 'genre/_delete_genre_modal.html'%}
+
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // для редактирования
+    const editModal = document.getElementById('editGenreModal');
+    const editForm = document.getElementById('editGenreForm');
+    const editNameInput = document.getElementById('editGenreName');
+
+    editModal.addEventListener('show.bs.modal', function(event) {
+        const button = event.relatedTarget; // кнопка, открывшая модалку
+        const actionUrl = button.getAttribute('data-action-url');
+        const genreName = button.getAttribute('data-genre-name');
+
+        editForm.action = actionUrl;
+        editNameInput.value = genreName;
+    });
+
+    // для удаления (тоже самое, только id другие)
+    const deleteModal = document.getElementById('deleteGenreModal');
+    const deleteForm = document.getElementById('deleteGenreForm');
+    const deleteNameSpan = document.getElementById('deleteGenreName');
+
+    deleteModal.addEventListener('show.bs.modal', function(event) {
+        const button = event.relatedTarget;
+        const actionUrl = button.getAttribute('data-action-url');
+        const genreName = button.getAttribute('data-genre-name');
+
+        deleteForm.action = actionUrl;
+        deleteNameSpan.textContent = genreName;
+    });
+});
+</script>
+{% endblock %}

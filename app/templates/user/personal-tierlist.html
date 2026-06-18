@@ -5,6 +5,15 @@
 <div class="container mt-4">
     <h2 class="text-center mb-4">Мой тирлист игр</h2>
 
+    <div class="d-flex justify-content-end mb-3">
+        <a href="{{ url_for('user.personal_tierlist_export', user_id=user_id, format='csv') }}" class="btn btn-outline-primary me-2">
+            <i class="bi bi-download"></i> Экспорт CSV
+        </a>
+        <a href="{{ url_for('user.personal_tierlist_export', user_id=user_id, format='json') }}" class="btn btn-outline-secondary">
+            <i class="bi bi-download"></i> Экспорт JSON
+        </a>
+    </div>
+
     {% set tier_colors = {
         'S': 'linear-gradient(135deg, #f6d365 0%, #fda085 100%)',
         'A': 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',

@@ -1,4 +1,7 @@
 from pathlib import Path
+import io
+import json
+import csv
 
 from flask_login import current_user
 from flask_wtf.file import FileRequired
@@ -28,7 +31,7 @@ def profile(user_id):
     selfprofile = True
     form = None
     delform = None
-    adminMode = user.role.value >= 20
+    adminMode = current_user.role.value >= 20
     
     if user_id != current_user.id:
         selfprofile = False
@@ -73,7 +76,67 @@ def personal_tierlist(user_id):
     for tier, value in tiers.items():
         tier_data[tier] = [r for r in reviews if r.mark == value]
 
-    return render_template('user/personal-tierlist.html', tier_data=tier_data)
+    return render_template('user/personal-tierlist.html', user_id=user_id, tier_data=tier_data)
+
+@bp.route('/<int:user_id>/profile/personal-tierlist/export')
+@login_required
+def personal_tierlist_export(user_id):
+    
+    format = request.args.get('format', 'csv').lower()
+    if format not in ('csv', 'json'):
+        flash('Неверный формат экспорта', 'warning')
+        return redirect(url_for('profile.tierlist'))  
+    
+    reviews = get_reviews_with_game(user_id)
+    # границы для тиров
+    tiers = {
+        'S': 5,
+        'A': 4,
+        'B': 3,
+        'C': 2,
+        'D': 1
+    }
+    
+    tier_data = {}
+    for tier, value in tiers.items():
+        tier_data[tier] = [{
+            'tier': tier,
+            'game_title': r.game.title,
+            'rating': r.mark,
+            'platforms': ', '.join(p.name for p in r.game.platforms) if r.game.platforms else '',
+            'genres': ', '.join(g.name for g in r.game.genres) if r.game.genres else ''
+            } for r in reviews if r.mark == value]
+        
+    user: User = get_item(User, user_id)
+    filename=f"{user.nickname}"
+        
+    if format == 'csv':
+        ext = ".csv"
+        si = io.StringIO()
+        writer = csv.writer(si)
+        writer.writerow(['Уровень', 'Название игры', 'Оценка', 'Платформы', 'Жанры'])
+        # Проходим по всем уровням и всем элементам внутри
+        for tier_items in tier_data.values():
+            for item in tier_items:
+                writer.writerow([
+                    item['tier'],
+                    item['game_title'],
+                    item['rating'],
+                    item['platforms'],
+                    item['genres']
+                ])
+        output = make_response(si.getvalue())
+        output.headers["Content-Disposition"] = f"attachment; filename={filename}{ext}"
+        output.headers["Content-type"] = "text/csv; charset=utf-8"
+        return output
+
+    elif format == 'json':
+        ext = ".json"
+        # Сериализуем весь словарь tier_data как есть
+        output = make_response(json.dumps(tier_data, ensure_ascii=False, indent=2))
+        output.headers["Content-Disposition"] = f"attachment; filename={filename}{ext}"
+        output.headers["Content-type"] = "application/json; charset=utf-8"
+        return output
 
 @bp.route('/<int:user_id>/profile/change-avatar', methods=['GET', 'POST'])
 @login_required
@@ -127,7 +190,7 @@ def change_avatar(user_id):
         # Если мы здесь, значит была ошибка (кроме FileDeleteError, который уже сделал редирект)
         return render_template('user/change-avatar.html', form=form), 500
 
-    return render_template('user/change-avatar.html', form=form)
+    return render_template('user/change-avatar.html', form=form, user=user)
 
 @bp.route('/<int:user_id>/profile/change-pass', methods=['GET', 'POST'])
 @login_required
