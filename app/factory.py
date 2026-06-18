@@ -35,6 +35,14 @@ def create_app(settings=None):
     init_login_manager(app)
     csrf.init_app(app)
 
+    with app.app_context():
+        try:
+            db.session.execute(db.text('SELECT 1'))
+        except Exception as e:
+            raise RuntimeError(
+                "Не удалось подключиться к базе данных. Приложение не может быть запущено."
+            ) from e
+
     # Регистрация blueprints
     from app.auth import bp as auth_bp
     app.register_blueprint(auth_bp)

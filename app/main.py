@@ -2,7 +2,6 @@ import sys
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 #для миграций - export FLASK_APP='main.py'
-#пароль для _elder_kobold_ - qwe123rty456
 from datetime import datetime
 
 from flask import (

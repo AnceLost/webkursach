@@ -1,7 +1,5 @@
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
-__name__ = 'config'
-
 class Settings(BaseSettings):
     DB_HOST: str = "localhost"
     DB_PORT: int = 5432

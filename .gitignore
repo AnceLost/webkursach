@@ -4,3 +4,4 @@ venv
 app/.env
 app/static/uploads
 !app/static/uploads/defaults
+app/__pychache__
