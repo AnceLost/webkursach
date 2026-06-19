@@ -40,7 +40,7 @@ def create_app(settings=None):
             db.session.execute(db.text('SELECT 1'))
         except Exception as e:
             raise RuntimeError(
-                "Не удалось подключиться к базе данных. Приложение не может быть запущено."
+                "СНАЧАЛА ЗАПУСТИ POSTGRESQL!!!"
             ) from e
 
     # Регистрация blueprints
