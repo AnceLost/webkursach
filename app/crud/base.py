@@ -1,5 +1,5 @@
 from sqlalchemy.exc import SQLAlchemyError
-from typing import TypeVar, Optional
+from typing import TypeVar, Optional, List
 
 from app.dbhelper import db, Base
 from app.models import User, Game, Genre, Platform, Review, AccessLog

@@ -15,7 +15,8 @@ def dashboard():
 def users():
     all_users = get_items(User, page=1, per_page=200)
     delform = DeleteForm()
-    return render_template('admin/users.html', users=all_users, delform=delform)
+    banform = BanForm()
+    return render_template('admin/users.html', users=all_users, delform=delform, banform=banform)
 
 @bp.route('/games')
 @login_required

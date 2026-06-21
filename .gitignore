@@ -5,3 +5,8 @@ app/.env
 app/static/uploads
 !app/static/uploads/defaults
 app/__pychache__
+__pycache__/
+*.py[cod]
+*$py.class
+.env
+app/migrations/

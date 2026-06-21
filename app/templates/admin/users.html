@@ -14,13 +14,17 @@
             {% if current_user.id != user.id %}
                 {% if user.banned %}
                 <form method="POST" action="{{ url_for('user.toggle_ban', user_id=user.id) }}" style="display:inline">
+                    {{ banform.hidden_tag() }}
                     <input type="hidden" name="action" value="unban">
                     <button class="btn btn-sm btn-success">Разбанить</button>
                 </form>
                 {% else %}
-                <form method="POST" action="{{ url_for('user.toggle_ban', user_id=user.id) }}" style="display:inline" onsubmit="return confirm('Забанить пользователя?')">
+                <form method="POST" action="{{ url_for('user.toggle_ban', user_id=user.id) }}" style="display:inline">
+                    {{ banform.hidden_tag() }}
                     <input type="hidden" name="action" value="ban">
-                    <button class="btn btn-sm btn-warning">Забанить</button>
+                    <input class="btn btn-warning btn-sm" id="submit" name="submit" 
+                    onclick="return confirm('Забанить пользователя? Все его отзывы будут удалены!');" 
+                    type="submit" value="Забанить">
                 </form>
                 {% endif %}
             {% endif %}
