@@ -10,3 +10,10 @@ __pycache__/
 *$py.class
 .env
 app/migrations/
+migrations/
+
+app/static/upload/avatars/*
+!app/static/upload/avatars/defaultavatar.jpg
+
+app/static/upload/covers/*
+!app/static/upload/covers/defaultcover.jpg
