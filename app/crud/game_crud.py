@@ -10,7 +10,7 @@ def search_games(title_contains: str = None,
     """Поиск игр по названию, жанрам"""
     query = db.select(Game)
     if title_contains:
-        query = query.where(Game.title.contains(title_contains.lower()))
+        query = query.where(Game.title.contains(title_contains))
     if genre_ids:
         query = query.where(
             Game.genres.any(Genre.id.in_(genre_ids))
